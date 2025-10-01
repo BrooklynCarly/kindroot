@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import after setting up environment
-from agents.autogen import AutoGenAgent
+from agents.autogen.autogen_agent import AutoGenAgent
 import autogen_agentchat
 
 # Configure logging
