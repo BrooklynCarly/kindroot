@@ -18,7 +18,7 @@ def _sha256_of_obj(obj: Any) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def build_patient_report(triage_result: Dict[str, Any], source_version: str = "1.0.0") -> Dict[str, Any]:
+def build_patient_report(triage_result: Dict[str, Any] | Any, source_version: str = "1.0.0") -> Dict[str, Any]:
     """
     Build patient-friendly report JSON from clinician triage result.
 
@@ -27,8 +27,19 @@ def build_patient_report(triage_result: Dict[str, Any], source_version: str = "1
 
     Returns JSON with keys per the patient's simplified schema:
     - summary_title, message, urgent_items, meta
+    
+    Args:
+        triage_result: Either a dict or a Pydantic TriageResult model
     """
-    urgent_items: List[Dict[str, Any]] = list(triage_result.get("urgent_items", []) or [])
+    # Convert Pydantic model to dict if needed
+    if hasattr(triage_result, 'model_dump'):
+        triage_dict = triage_result.model_dump()
+    elif hasattr(triage_result, 'dict'):
+        triage_dict = triage_result.dict()
+    else:
+        triage_dict = triage_result
+    
+    urgent_items: List[Dict[str, Any]] = list(triage_dict.get("urgent_items", []) or [])
 
     # Only include URGENT items and only the required fields
     urgent_items_filtered: List[Dict[str, Any]] = []
@@ -55,7 +66,7 @@ def build_patient_report(triage_result: Dict[str, Any], source_version: str = "1
         "meta": {
             "source_version": source_version,
             "generated_at": datetime.now(timezone.utc).isoformat(),
-            "linked_input_hash": _sha256_of_obj(triage_result),
+            "linked_input_hash": _sha256_of_obj(triage_dict),
         },
     }
     return report

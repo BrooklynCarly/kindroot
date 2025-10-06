@@ -1,0 +1,395 @@
+{
+    "metadata": {
+      "title": "ASD Functional Medicine Knowledge Base (LLM-Ready)",
+      "version_date": "2025-10-06",
+      "purpose": "Compressed, systems-oriented reference for an LLM assisting clinicians with first-pass biomedical/functional evaluation and care planning for individuals with ASD. Emphasizes root-cause investigation across gut, immunity, genetics/epigenetics, toxicity, and nutrition, coordinating with conventional therapies.",
+      "disclaimer": "For clinical decision support only; not diagnostic or a substitute for clinician judgment. Always prioritize safety and local standards of care."
+    },
+    "clinical_stance_and_roadmap": {
+      "principles": [
+        "ASD involves medical and systems factors in addition to behavior; treat physiologic imbalances, not only behaviors.",
+        "Use a matrix view (assimilation, immune/repair, energy/mitochondria, detox, transport, communication, structure). Personalize to the N=1.",
+        "Combine biomedical work with speech/OT/PT/ABA and neurology when indicated.",
+        "Reduce total body burden and restore balance stepwise; expect gradual gains."
+      ],
+      "core_domains": [
+        "gut",
+        "immunity",
+        "genetics_epigenetics",
+        "toxicity",
+        "nutrition"
+      ],
+      "baseline_orientation": [
+        "Confirm diagnosis and differentials.",
+        "Obtain foundational genetics (Chromosomal Microarray ± exome).",
+        "Screen for seizures; favor extended at-home EEG when indicated.",
+        "Set family goals and document baselines (video, symptom scales) to track change."
+      ]
+    },
+    "domains": {
+      "gut": {
+        "why_it_matters": [
+          "Enteric nervous system and gut–brain axis regulate immune tone, neurotransmitters, and nutrient assimilation.",
+          "Gut dysfunction (constipation, diarrhea, encopresis) is common in ASD.",
+          "Gut-first approach: other therapies falter if absorption and barrier are impaired."
+        ],
+        "key_mechanisms": [
+          "Increased intestinal permeability (zonulin upregulation) permits antigen/LPS translocation → systemic inflammation/autoimmunity → behavioral symptoms.",
+          "SIBO/dysbiosis and hypochlorhydria; stress can shift flora sometimes more than diet.",
+          "Environmental inputs (water, soil/compost, animals) can disturb flora."
+        ],
+        "assessment": [
+          "Comprehensive stool microbiome/GI function panel with inflammatory markers.",
+          "Fecal zonulin for permeability.",
+          "Contextual exposure review (home, water, food handling, animals)."
+        ],
+        "interventions_5R": {
+          "remove": [
+            "Eliminate inflammatory foods and suspected triggers.",
+            "Treat pathogens (e.g., antifungals such as nystatin/fluconazole; botanicals like Biocidin) as indicated.",
+            "Address environmental triggers."
+          ],
+          "replace": [
+            "Digestive enzymes",
+            "Consider betaine HCl if hypochlorhydria is suspected/confirmed."
+          ],
+          "reinoculate": [
+            "High-grade probiotics (e.g., VSL#3; cold-chain required)."
+          ],
+          "repair": [
+            "Glutamine",
+            "Collagen/gelatin/bone-broth amino acids",
+            "Mucosal nutrients as tolerated."
+          ],
+          "rebalance": [
+            "Prebiotics",
+            "Stress and sleep hygiene",
+            "Fiber diversification."
+          ]
+        },
+        "quality_control_notes": [
+          "Use GMP-grade products; avoid counterfeit or heat-damaged supplements.",
+          "Introduce ferments and prebiotics slowly to limit die-off reactions."
+        ]
+      },
+      "immunity": {
+        "why_it_matters": [
+          "ASD often presents with immune dysregulation (hyper/hypo patterns) and chronic inflammation.",
+          "Infection-linked neuropsychiatric changes may occur (e.g., PANDAS/PANS).",
+          "Gut integrity, mitochondrial status, and detox capacity modulate immune fitness."
+        ],
+        "mechanisms_and_clinical_pictures": [
+          "Leaky gut → molecular mimicry → autoantibodies; endotoxemia from bacterial translocation.",
+          "Immunoglobulin deficiencies predispose to chronic infections and behavior changes.",
+          "Attenuated fever responses can signal immune dysfunction.",
+          "PANDAS/PANS: abrupt OCD/tics/restriction after strep/viral/other triggers; requires direct treatment of infection/autoimmunity."
+        ],
+        "testing": {
+          "tier_1": [
+            "CBC with differential",
+            "Quantitative immunoglobulins (IgG, IgA, IgM, IgE)",
+            "ANA",
+            "CRP/ESR",
+            "Stool panel with inflammatory markers; fecal zonulin",
+            "Organic acids (mitochondrial stress signals)",
+            "Carnitine profile"
+          ],
+          "tier_2": [
+            "PANDAS/PANS panel as indicated",
+            "Mycoplasma/EBV/Lyme titers as clinically indicated",
+            "Targeted autoantibodies based on phenotype",
+            "Heavy metals and environmental toxins assessment",
+            "Nutrigenomic panels to prioritize supports"
+          ]
+        },
+        "interventions": [
+          "Foundation: restore gut barrier; optimize nutrients and mitochondrial cofactors.",
+          "Immune modulation options: low-dose naltrexone (LDN) for autoimmunity; IVIG for hypogammaglobulinemia.",
+          "Targeted antimicrobials for confirmed infections.",
+          "Prefer alternatives to frequent acetaminophen due to glutathione depletion; support detox if used.",
+          "Track markers and behaviors longitudinally."
+        ]
+      },
+      "genetics_epigenetics": {
+        "principles": [
+          "Genetic variants influence pathways (methylation, neurotransmitters, mitochondria, detox, inflammation), but environment modulates expression.",
+          "Use genetics to prioritize supports and anticipate sensitivities; pair with phenotype and labs."
+        ],
+        "pathways_and_supports": {
+          "methylation": {
+            "common_variants_examples": [
+              "MTHFR",
+              "MTRR",
+              "GIF",
+              "FOLR1"
+            ],
+            "supports": [
+              "Methylfolate",
+              "B12 (methyl/hydroxo as tolerated)",
+              "Monitor folate/B12 cycles for growth and neurotransmission."
+            ]
+          },
+          "neurotransmitters": {
+            "common_variants_examples": [
+              "MAOA",
+              "GAD1",
+              "COMT"
+            ],
+            "supports": [
+              "Magnesium",
+              "L-theanine",
+              "Consider CBD case-by-case",
+              "Balance serotonin/GABA/dopamine"
+            ]
+          },
+          "mitochondria": {
+            "common_variants_examples": [
+              "COX subunits",
+              "NDUFS",
+              "UQCRC",
+              "ATP5G3",
+              "SLC19A1"
+            ],
+            "supports": [
+              "CoQ10/ubiquinol",
+              "Carnitine",
+              "B-complex",
+              "Antioxidants"
+            ]
+          },
+          "detoxification": {
+            "common_variants_examples": [
+              "GSTP1",
+              "SOD2",
+              "CTH",
+              "CBS",
+              "NAT2"
+            ],
+            "supports": [
+              "Glutathione (reduced or liposomal)",
+              "NAC",
+              "Avoid frequent acetaminophen"
+            ]
+          },
+          "inflammation_histamine_vitaminD": {
+            "common_variants_examples": [
+              "TNF polymorphisms",
+              "FUT2",
+              "AOC1",
+              "VDR"
+            ],
+            "supports": [
+              "Vitamin D optimization (often higher needs)",
+              "Histamine-aware diet when indicated"
+            ]
+          }
+        },
+        "clinical_use": [
+          "Educate families to prevent overwhelm; genetics guide priority and caution, not destiny.",
+          "Integrate with clinical response and objective markers; adjust iteratively."
+        ]
+      },
+      "toxicity": {
+        "framework": [
+          "Many ASD patients have elevated toxic load and/or impaired detox (Phase I–III).",
+          "Address current exposures first; build foundation (gut, nutrients, mitochondria, sleep/stress) before chelation."
+        ],
+        "common_exposures": [
+          "Heavy metals (lead, mercury, arsenic, cadmium, aluminum)",
+          "Plastics (phthalates, BPA)",
+          "Pesticides and herbicides",
+          "Mold/mycotoxins",
+          "VOCs",
+          "PFAS and other persistent chemicals"
+        ],
+        "biology": [
+          "Glutathione depletion is common and worsened by acetaminophen use.",
+          "Oxidative stress and mitochondrial strain compound symptom burden."
+        ],
+        "protocol_hierarchy": [
+          {
+            "phase": "1_foundation_3_to_6_months",
+            "actions": [
+              "Ensure daily bowel regularity and adequate hydration.",
+              "Replete antioxidants/thiols (glutathione, NAC, alpha-lipoic acid).",
+              "Mineral repletion and mitochondrial supports.",
+              "Exercise/sweating/sauna as tolerated; sleep optimization."
+            ]
+          },
+          {
+            "phase": "2_natural_support",
+            "actions": [
+              "Liver support (e.g., milk thistle) as appropriate.",
+              "Sulfur-rich foods and crucifers to support conjugation pathways.",
+              "Ongoing exposure control: air/water filtration, low-toxin personal/home products, mold inspection/remediation if indicated."
+            ]
+          },
+          {
+            "phase": "3_targeted_chelation_if_indicated",
+            "actions": [
+              "Agent selection (e.g., DMSA, EDTA) vs gentler binders (modified citrus pectin, chlorella) based on clinician judgment.",
+              "Start low and go slow; monitor CBC/chemistry and minerals; watch for yeast overgrowth and redistribution reactions."
+            ]
+          }
+        ]
+      },
+      "nutrition": {
+        "principles": [
+          "Diet modulates inflammation, mitochondrial throughput, and neurobehavioral symptoms.",
+          "No single diet fits all ASD phenotypes; customize via structured elimination and reintroduction."
+        ],
+        "core_moves": [
+          "Begin with gluten/casein/soy-free baseline.",
+          "Run a 21-day elimination; reintroduce one food at a time (≥3 days each).",
+          "Limit added sugar to ≤20 g/day and audit hidden sugars.",
+          "Optimize omega-3 intake (often EPA>DHA in 1,500–3,600 mg/day ranges under clinician guidance).",
+          "Correct omega-6 bias and provide high-quality fats for brain development.",
+          "Consider low-FODMAP for GI bloat, ketogenic strategies for seizures, and low-histamine/phenol variants per genetics/symptoms."
+        ],
+        "mechanisms_to_remember": [
+          "Casomorphins (opioid-like peptides from dairy) may affect behavior in sensitive individuals.",
+          "High sugar drives delta-5 desaturase activity, shifting lipid balance away from omega-3 benefits.",
+          "Vagal gut–brain signaling links intestinal state to behavior and sleep."
+        ],
+        "practical_tactics": [
+          "Smoothies as a vehicle for fats and supplements.",
+          "Pantry reset; perimeter-of-store shopping.",
+          "Disguise vegetables and diversify fibers.",
+          "Support picky eating with gentle, consistent strategies."
+        ]
+      }
+    },
+    "evaluation_and_care_algorithm": {
+      "intake_and_orientation": [
+        "Confirm ASD vs mimics; document developmental and medical history.",
+        "Order CMA (± exome) genetics.",
+        "Screen for seizures (consider extended EEG when suspicion).",
+        "Capture baseline videos and symptom scales to detect small gains."
+      ],
+      "foundational_labs_first_pass": [
+        "CBC, CMP",
+        "Ferritin, B12, folate",
+        "Vitamin D, zinc, magnesium",
+        "IgG, IgA, IgM, IgE",
+        "ANA, CRP/ESR",
+        "Stool panel with pathogens/inflammation and fecal zonulin",
+        "Organic acids",
+        "Carnitine profile"
+      ],
+      "initial_plan_8_to_12_weeks": [
+        "Gut 5R sequence (remove → replace → reinoculate → repair → rebalance).",
+        "Nutrition reset (GFCF/SF, sugar audit, omega-3 optimization).",
+        "Sleep and stress hygiene.",
+        "Targeted antimicrobials for yeast/bacteria if indicated.",
+        "Ensure mineral and cofactor support."
+      ],
+      "second_pass_adaptive": [
+        "Immune tier-2 workup (PANDAS/PANS, occult infections) based on phenotype.",
+        "Mitochondrial panel refinement as needed.",
+        "Nutrigenomics for prioritization of supports.",
+        "If toxic burden suspected, implement detox foundation steps."
+      ],
+      "escalation": [
+        "IVIG for hypogammaglobulinemia when indicated.",
+        "LDN for autoimmune modulation where appropriate.",
+        "Chelation only after robust foundation and exposure control; close monitoring.",
+        "Coordinate neurology for epilepsy and continue ABA/SLP/OT/PT as appropriate."
+      ],
+      "tracking": [
+        "Reassess symptoms with videos and scales at regular intervals.",
+        "Monitor labs (inflammation, nutrients, immunoglobulins) and objective metrics (growth, energy, sleep).",
+        "Set expectations for gradual improvements; document both wins and setbacks."
+      ]
+    },
+    "safety_flags_prioritize_same_day": [
+      "Clinical seizures or regression",
+      "Severe malnutrition or dehydration",
+      "Severe GI red flags (e.g., bloody stools, obstruction signs)",
+      "Anaphylaxis risk or history",
+      "Suicidality or acute risk to self/others",
+      "Abrupt onset OCD/tics/food refusal after infection (suspicious for PANDAS/PANS)"
+    ],
+    "pearls_and_pitfalls": [
+      "Use GMP-grade supplements; verify cold-chain for probiotics; beware expired or heat-damaged products.",
+      "Acetaminophen depletes glutathione—prefer alternatives when appropriate and support detox pathways if used.",
+      "Build foundation before chelation to avoid redistribution, mineral loss, and yeast flares; start low and go slow."
+    ],
+    "quick_reference": {
+      "gut": {
+        "exemplar_tests": [
+          "Stool panel with pathogens/inflammation",
+          "Fecal zonulin"
+        ],
+        "first_line_supports": [
+          "Remove triggers/pathogens",
+          "Digestive enzymes",
+          "High-grade probiotics (e.g., VSL#3)",
+          "Mucosal repair nutrients",
+          "Prebiotics",
+          "Stress hygiene"
+        ]
+      },
+      "immunity": {
+        "exemplar_tests": [
+          "Immunoglobulins",
+          "ANA",
+          "CRP/ESR",
+          "Targeted infection titers"
+        ],
+        "first_line_supports": [
+          "Treat confirmed infections",
+          "IVIG if deficient",
+          "LDN for autoimmunity",
+          "Maintain gut barrier and nutrient status"
+        ]
+      },
+      "genetics_epigenetics": {
+        "exemplar_tests": [
+          "CMA (± exome)",
+          "Targeted SNP panels (MTHFR, COMT, GAD1, GSTP1, VDR)"
+        ],
+        "first_line_supports": [
+          "Methylfolate/B12",
+          "Neurotransmitter-balancing nutrients",
+          "Glutathione/NAC",
+          "Vitamin D titration"
+        ]
+      },
+      "toxicity": {
+        "exemplar_tests": [
+          "Exposure history",
+          "Hair/urine metals",
+          "Porphyrins",
+          "Home/environment audit"
+        ],
+        "first_line_supports": [
+          "Exposure control",
+          "Antioxidant/thiol repletion",
+          "Sweating/sauna as tolerated",
+          "Consider chelation when ready"
+        ]
+      },
+      "nutrition": {
+        "exemplar_tests": [
+          "Omega-3 index (if available)",
+          "Glucose/insulin/A1c as clinically indicated"
+        ],
+        "first_line_supports": [
+          "GFCF/SF baseline",
+          "Omega-3 optimization",
+          "Low-glycemic whole-food pattern",
+          "Consider ketogenic approach for seizures"
+        ]
+      }
+    },
+    "llm_behavior_notes": [
+      "Always prioritize safety; surface urgent flags immediately.",
+      "Propose least-risk, foundation-first steps before escalations.",
+      "Tie recommendations to observed phenotypes and labs, not labels alone.",
+      "Offer options and monitoring plans; set expectations for gradual change."
+    ],
+    "source_set": [
+      "User-provided summaries: Chapters 1–3 (orientation/roadmap), Immunity, Gut, Toxicity, Genetics, Nutrition."
+    ]
+  }
+  

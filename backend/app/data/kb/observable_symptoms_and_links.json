@@ -1,0 +1,275 @@
+{
+  "title": "Observable symptoms and underlying issues",
+  "schema_version": "1.0",
+  "symptoms": [
+    {
+      "name": "Speech Delay or Lack of Speech",
+      "notes": "Speech issues can be caused or exacerbated by various underlying medical issues.",
+      "causes": [
+        { "name": "Seizures" },
+        { "name": "Sleep apnea" },
+        { "name": "Cerebral Folate Deficiency" },
+        {
+          "name": "Vitamin and/or Mineral Deficiencies",
+          "details": [
+            "Essential Fatty Acid (EFA) deficiency",
+            "B12 deficiency",
+            "Other vitamin and nutrient deficiencies (B6, 5MTHF, B1, creatine, L-Carnitine, CoQ10, sulfur-rich compounds, magnesium, iron, butyrate)"
+          ]
+        },
+        { "name": "Tongue-tie" },
+        { "name": "Retained primitive reflexes" },
+        { "name": "Mitochondrial dysfunction" }
+      ]
+    },
+    {
+      "name": "Developmental Delays",
+      "notes": "Delays in gross/fine motor, socialization, communication, or cognitive skills; investigate underlying reasons.",
+      "causes": [
+        { "name": "Cerebral Folate Deficiency" },
+        { "name": "Seizures" },
+        { "name": "Vitamin/mineral deficiency" },
+        { "name": "B12 deficiency" },
+        { "name": "Thiamine (B1) deficiency" },
+        { "name": "Mitochondrial dysfunction" },
+        { "name": "Thyroid dysfunction (Hypothyroidism / Hyperthyroidism / Hashimoto’s)" },
+        { "name": "Retained primitive reflexes (asymmetrical tonic neck reflex)" },
+        { "name": "Immune dysfunction" },
+        { "name": "Toxic mold exposure" }
+      ]
+    },
+    {
+      "name": "Sleep Problems",
+      "notes": "Common in autism; addressing root causes can be life-changing.",
+      "causes": [
+        { "name": "Seizures" },
+        {
+          "name": "Gastrointestinal issues",
+          "details": [
+            "Constipation or other GI pain",
+            "Overgrowth of fungus or pathogenic bacteria in the gut"
+          ]
+        },
+        {
+          "name": "Vitamin and/or Mineral Deficiencies",
+          "details": [
+            "Need for magnesium, potassium, or other minerals",
+            "Low vitamin D",
+            "Low iron"
+          ]
+        },
+        { "name": "Cerebral Folate Deficiency" },
+        {
+          "name": "Problems with sulfation",
+          "details": ["Epsom salt baths might help"]
+        },
+        { "name": "Allergies" },
+        { "name": "Enlarged adenoids and tonsils" },
+        { "name": "Food sensitivities" },
+        { "name": "Low blood sugar" },
+        { "name": "EMF exposure" },
+        { "name": "Excess glutamate in the brain" },
+        { "name": "Mitochondrial dysfunction" }
+      ]
+    },
+    {
+      "name": "Irritability / Aggression / Meltdowns",
+      "notes": "Behavior can reflect underlying medical causes; identify and treat root contributors.",
+      "causes": [
+        {
+          "name": "Unrecognized pain",
+          "details": [
+            "GI issues (e.g., constipation)",
+            "Headaches, sinus pain, or migraines",
+            "Dental issues",
+            "Ear infections"
+          ]
+        },
+        { "name": "Anxiety" },
+        { "name": "Seizures" },
+        {
+          "name": "Low levels of vitamins and minerals",
+          "details": ["Lithium orotate, folate, magnesium"]
+        },
+        { "name": "Low cholesterol" },
+        { "name": "Chronic underlying infection (Strep, Lyme, Lyme co-infections)" },
+        { "name": "PANS or PANDAS" },
+        { "name": "Clostridia" },
+        { "name": "Low blood sugar" },
+        { "name": "Adrenal fatigue / low cortisol" },
+        { "name": "Lead or other heavy metal toxicity" },
+        { "name": "Elevated ammonia" },
+        { "name": "Hormonal imbalance (excess androgens)" },
+        { "name": "Food allergies and/or sensitivities (especially corn)" },
+        { "name": "Phenols and salicylates in food" }
+      ]
+    },
+    {
+      "name": "Anxiety / OCD",
+      "notes": "Common in autism; multiple treatable contributors may relieve symptoms.",
+      "causes": [
+        { "name": "PANS / PANDAS" },
+        { "name": "Cerebral Folate Deficiency" },
+        { "name": "Low cholesterol" },
+        {
+          "name": "Vitamin and/or mineral deficiencies",
+          "details": ["Iron", "Zinc", "B1", "B6", "Folate (B9)", "B12"]
+        },
+        { "name": "Elevated glutamate and low GABA" },
+        {
+          "name": "Gastrointestinal issues",
+          "details": [
+            "Overgrowth of pathogenic bacteria in the gut",
+            "Low diversity in gut flora"
+          ]
+        },
+        { "name": "Elevated histamine" },
+        { "name": "Neuroinflammation" },
+        {
+          "name": "Poor adrenal function and norepinephrine regulation",
+          "details": ["Body stuck in fight-or-flight"]
+        },
+        { "name": "Retained primitive reflexes" }
+      ]
+    },
+    {
+      "name": "Sensory Processing Issues (SPD)",
+      "notes": "Over- or under-sensitivity to sensory input; various biological contributors.",
+      "causes": [
+        { "name": "Low B6 (P5P) and magnesium" },
+        { "name": "Food intolerance" },
+        {
+          "name": "Gastrointestinal issues",
+          "details": [
+            "Fungal overgrowth in the gut",
+            "Pathogenic bacterial overgrowth in the gut"
+          ]
+        },
+        {
+          "name": "Problems with sulfation",
+          "details": ["Epsom salt baths might help"]
+        },
+        { "name": "Underlying infection (Strep, Lyme)" },
+        { "name": "Heavy metal excess" },
+        { "name": "Retained primitive reflexes" }
+      ]
+    },
+    {
+      "name": "Toe Walking",
+      "notes": "Often attributed to SPD, but other causes may contribute.",
+      "causes": [
+        { "name": "Constipation" },
+        { "name": "Mineral deficiency (magnesium, zinc)" },
+        { "name": "Thiamine (B1) deficiency" },
+        { "name": "Food sensitivities (dairy, gluten)" },
+        { "name": "Developmental vision problem" },
+        { "name": "Retained primitive reflex (tonic labyrinthine reflex)" }
+      ]
+    },
+    {
+      "name": "Stimming (Self-stimulatory behavior)",
+      "notes": "May be self-soothing; can also reflect medical contributors.",
+      "causes": [
+        {
+          "name": "Gastrointestinal issues",
+          "details": ["Constipation or GI pain", "Fungal overgrowth in the gut"]
+        },
+        { "name": "Seizures" },
+        { "name": "Food reactions" },
+        { "name": "Low cholesterol" },
+        { "name": "Low mineral levels" },
+        { "name": "Elevated glutamate in the brain" },
+        { "name": "Retained primitive reflexes" },
+        { "name": "Elevated ammonia" },
+        { "name": "Asterixis due to encephalopathy" }
+      ]
+    },
+    {
+      "name": "Echolalia",
+      "notes": "Repetition of phrases/words/parts of words.",
+      "causes": [
+        { "name": "Seizures" },
+        { "name": "Food reactions" },
+        { "name": "Constipation or GI pain" },
+        { "name": "Low mineral levels" },
+        { "name": "Elevated glutamate in the brain" },
+        { "name": "Elevated ammonia" },
+        { "name": "Low cholesterol" }
+      ]
+    },
+    {
+      "name": "Picky Eating (Selective Eating)",
+      "notes": "Addressing causes can reduce anxiety and improve nutrition.",
+      "causes": [
+        {
+          "name": "Gastrointestinal issues",
+          "details": [
+            "Constipation",
+            "GERD (reflux)",
+            "Eosinophilic Esophagitis",
+            "Fungal overgrowth in the gut"
+          ]
+        },
+        { "name": "Tooth pain" },
+        { "name": "Low minerals (especially zinc)" },
+        { "name": "PANS / PANDAS" },
+        { "name": "Food sensitivities" },
+        { "name": "Retained primitive reflexes" }
+      ]
+    },
+    {
+      "name": "Pica",
+      "notes": "Eating/chewing non-food items; causes may also be consequences.",
+      "causes": [
+        {
+          "name": "Vitamin and/or mineral deficiencies",
+          "details": ["Iron deficiency", "Zinc deficiency", "Thiamine deficiency"]
+        },
+        { "name": "Fungal overgrowth in the gut" },
+        { "name": "Parasitic infection" },
+        { "name": "Tooth pain" }
+      ]
+    },
+    {
+      "name": "Hyperlexia",
+      "notes": "Above-normal reading with below-normal spoken-language comprehension.",
+      "causes": [
+        { "name": "Hemispheric imbalance (one side stronger than the other)" }
+      ]
+    },
+    {
+      "name": "Hypotonia (Low Muscle Tone)",
+      "notes": "Low baseline muscle tension/resistance; often accompanied by reduced strength.",
+      "causes": [
+        { "name": "Mitochondrial dysfunction" },
+        { "name": "Vitamin/mineral deficiency" }
+      ]
+    },
+    {
+      "name": "Inattention or Lack of Focus",
+      "notes": "Common and sometimes remediable by addressing underlying contributors.",
+      "causes": [
+        { "name": "Seizures" },
+        {
+          "name": "Food sensitivities",
+          "details": ["Dairy", "Gluten", "Food dyes"]
+        },
+        { "name": "Essential fatty acid deficiency" },
+        {
+          "name": "Vitamin or mineral deficiency",
+          "details": ["Iron", "Magnesium", "Vitamin D", "Zinc", "Folate"]
+        },
+        { "name": "Reduced cerebral blood flow" },
+        { "name": "Fungal or bacterial overgrowth in the gut" },
+        { "name": "Retained primitive reflexes (Moro reflex for impulse control)" }
+      ]
+    }
+  ],
+  "usage_notes": [
+    "This KB is designed to help the Lead Investigator map observable symptoms to testable hypotheses.",
+    "Always prioritize safety flags (seizures, regression, severe GI) over other concerns.",
+    "Look for cross-cutting patterns where one root cause explains multiple symptom clusters.",
+    "Modifiability ratings: High = can be tested and treated relatively easily; Moderate = requires specialist; Low = limited treatment options.",
+    "This is not diagnostic; it generates hypotheses for clinician review."
+  ]
+}
