@@ -83,6 +83,7 @@ from agents.autogen.agents import (
     TriageService,
     PatientParseService,
     LeadInvestigatorService,
+    ResourceGenerationService,
 )
 
 # Root endpoint
@@ -503,52 +504,9 @@ async def generate_resources(
                 detail="Either 'summary' or 'zipcode' parameter is required"
             )
         
-        # Initialize Gemini
-        gemini_api_key = os.getenv("GEMINI_API_KEY")
-        if not gemini_api_key:
-            error_msg = "GEMINI_API_KEY environment variable not found. Please add it to your .env file."
-            if debug:
-                error_msg += f" Current environment: {dict(os.environ)}"
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=error_msg
-            )
-        
-        # Ensure we have all required imports at the top level
-        current_file = Path(__file__).resolve()
-        project_root = current_file.parents[2]  # Go up from backend/app to kindroot
-        agents_dir = project_root / 'agents'
-        
-        # Add to Python path if not already there
-        if str(project_root) not in sys.path:
-            sys.path.insert(0, str(project_root))
-        if str(agents_dir) not in sys.path:
-            sys.path.insert(0, str(agents_dir))
-        
-        # Debug information
-        if debug:
-            logger.info(f"Project root: {project_root}")
-            logger.info(f"Agents dir exists: {agents_dir.exists()}")
-            logger.info(f"Agents dir: {agents_dir}")
-            logger.info(f"Current sys.path: {sys.path}")
-        
         try:
-            # Now try the import
-            from agents.autogen.agents import GeminiChat, ResourceGenerationService
-            
-        except ImportError as ie:
-            error_msg = f"Failed to import required modules: {str(ie)}\n"
-            error_msg += f"Current Python path: {sys.path}\n"
-            error_msg += f"Project root: {project_root if 'project_root' in locals() else 'Not set'}"
-            if debug:
-                error_msg += f"\n\nPython path: {sys.path}"
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=error_msg
-            )
-            
-        try:
-            llm = GeminiChat(api_key=gemini_api_key)
+            # Use OpenAI for resource generation
+            llm = OpenAIChat(api_key=OPENAI_API_KEY)
             service = ResourceGenerationService(llm=llm)
             
             # Use provided zipcode or extract from summary
@@ -563,18 +521,20 @@ async def generate_resources(
                 }
                 
             # Generate resources
-            result = service.generate_resources(summary or zipcode)  # Pass the full summary or zipcode
-            
-            # If the result is a string, it might be an error message
-            if isinstance(result, str):
-                result = {"status": "error", "message": result}
-                
+            result = service.generate_resources(summary or zipcode)
+
+            # Check for error or skipped status
+            if result.get("status") in ("error", "skipped"):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=result.get("message") or result.get("reason", "Resource generation failed.")
+                )
+
             return {
                 "status": "success",
                 "zipcode": zipcode,
-                "resources": result.get("resources", []),
-                "generated_at": datetime.datetime.utcnow().isoformat(),
-                "debug": {"raw_result": result} if debug else None
+                "data": result,
+                "generated_at": datetime.datetime.utcnow().isoformat()
             }
             
         except Exception as e:

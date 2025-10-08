@@ -4,11 +4,22 @@ from dataclasses import dataclass
 import json
 import logging
 import time
+import datetime
+import traceback
+import os
+import requests
 
 try:
     from pydantic import BaseModel, Field, ValidationError
 except Exception:  # pydantic v1 fallback if needed
     from pydantic.v1 import BaseModel, Field, ValidationError
+
+try:
+    # Make sure you have the correct library installed: pip install google-generativeai
+    import google.generativeai as genai
+except ImportError:
+    raise ImportError("google-generativeai is not installed. Please install it with 'pip install google-generativeai'")
+# ... (keep other code)
 
 # ---------- Logging ----------
 def get_logger(name: str = "kindroot.agents") -> logging.Logger:
@@ -100,6 +111,93 @@ LEAD_INVESTIGATOR_PROMPT = """You are the Lead Investigator in a functional medi
     Suggested daily life modifications or lightweight interventions.
     Provide at least 2 hypotheses, and up to 5. Be sure to emphasize the most obvious if there is one. Do not generate any hyptotheses without good data.
     Do not diagnose; only generate hypotheses for clinician consideration."""
+
+RESOURCE_GENERATION_PROMPT = """You are an assistant that uses the provided web-search tool. You do not provide medical advice or diagnoses. Your output is strictly informational and must be verifiable via cited official sources. Do not collect or output user PII. Do not contact providers. Exclude sponsored results and paywalled directories. Prefer .gov or official state domains for Part C programs.
+
+# METADATA
+- **Title**: Early Intervention Resource Finder
+- **Version**: 1.0
+- **Purpose**: Guide an LLM to find early intervention resources and nearby therapy providers using web search, given a U.S. ZIP code.
+- **Disclaimer**: Information is purely for informational purposes and does not constitute a recommendation. It is for navigation and referral support; verify against official sources.
+
+# INPUTS
+- `zip_code`: string (required)
+- `city`: string (optional, can be inferred)
+- `state`: string (optional, can be inferred)
+
+# HIGH-LEVEL TASK
+Given a patient ZIP code, identify the state Early Intervention (Part C) program  and nearby providers within a distance determined by metro vs non-metro classification.
+
+# STEPS
+
+**Step 1: State and EI Site**
+- **Goal**: Identify the state for the ZIP code and the official Early Intervention website.
+- **Actions**: Map `zip_code` to state and city. Search for the official state Early Intervention website. Verify the site is authoritative (prefer .gov or official state domain).
+- **Search Queries**: `[STATE] early intervention program`, `[STATE] Part C early intervention services`
+- **Outputs**: `state`, `ei_program` (with `website_url`, `contact_phone`, `contact_email`)
+
+**Step 2: Metro Classification**
+- **Goal**: Determine if the ZIP code is in a Metropolitan Statistical Area (MSA).
+- **Actions**: Search to determine metropolitan status.
+- **Search Queries**: `[ZIP] metropolitan statistical area`, `[CITY] [STATE] metropolitan area`
+- **Decision**: If part of an MSA -> `metropolitan = true`.
+- **Outputs**: `metropolitan` (boolean), `supporting_source` (URL)
+
+**Step 3: Search Radius**
+- **Goal**: Set search radius based on metro status.
+- **Decision**: `metropolitan === true` -> `radius_miles = 3`, `metropolitan === false` -> `radius_miles = 20`.
+- **Output**: `radius_miles` (number)
+
+**Step 4: Behavioral/ABA Search**
+- **Goal**: Find Behavioral/ABA therapy providers within the radius, using Google business results.
+- **Search Queries**: `ABA therapy [CITY] [STATE]`, `behavioral therapist autism [ZIP]`
+- **Filtering**: Ratings >= 4.2, Reviews >= 3, max 5 results, within radius, autism/developmental specialty.
+- **Output**: `behavioral_providers` (array of `Provider` objects)
+
+**Step 5: Speech Search**
+- **Goal**: Find Speech therapy providers within the radius, using Google business results.
+- **Search Queries**: `speech therapist [CITY] [STATE]`, `speech language pathologist [ZIP]`
+- **Filtering**: Ratings >= 4.2, Reviews >= 3, max 5 results, within radius, pediatric/developmental focus.
+- **Output**: `speech_providers` (array of `Provider` objects)
+
+# OUTPUT FORMAT
+Return ONLY a single valid JSON object matching the `SummaryReport` schema. Do not include any other text, comments, or markdown.
+
+```json
+{
+  "summary_report": {
+    "patient_location": {
+      "zip_code": "string",
+      "city": "string",
+      "state": "string"
+    },
+    "metropolitan_status": "Yes|No",
+    "search_radius_miles": 3,
+    "state_early_intervention_program": {
+      "website": "string",
+      "contact_phone": "string|null",
+      "contact_email": "string|null"
+    },
+    "behavioral_providers": [
+      {
+        "name": "string",
+        "rating": 4.8,
+        "review_count": 25,
+        "distance_miles": 1.2,
+        "address": "string",
+        "phone": "string|null",
+        "website": "string|null",
+        "specialties": ["string"],
+      }
+    ],
+    "speech_providers": [],
+    "additional_notes": ["string"]
+  }
+}
+```
+"""
+
+PEDIATRICIAN_FINDER_PROMPT = """You are a helpful research assistant. """
 
 # ---------- Schemas ----------
 class TriageItem(BaseModel):
@@ -235,6 +333,39 @@ class InvestigatorOutput(BaseModel):
         }
     }
 
+# Resource Generation Models
+class Provider(BaseModel):
+    name: str
+    rating: float = Field(..., ge=0, le=5)
+    review_count: Optional[int] = Field(None, ge=0)
+    distance_miles: float = Field(..., ge=0)
+    address: str
+    phone: Optional[str] = None
+    website: Optional[str] = None
+    specialties: Optional[List[str]] = None
+
+class StateEIRProgram(BaseModel):
+    website: str
+    contact_phone: Optional[str] = None
+    contact_email: Optional[str] = None
+
+class PatientLocation(BaseModel):
+    zip_code: str
+    city: str
+    state: str
+
+class SummaryReport(BaseModel):
+    patient_location: PatientLocation
+    metropolitan_status: Literal["Yes", "No"]
+    search_radius_miles: int
+    state_early_intervention_program: StateEIRProgram
+    behavioral_providers: List[Provider]
+    speech_providers: List[Provider]
+    additional_notes: Optional[List[str]] = None
+
+class ResourceFinderResult(BaseModel):
+    summary_report: SummaryReport
+
 # ---------- Utilities ----------
 def strip_code_fences(text: str) -> str:
     s = text.strip()
@@ -244,10 +375,32 @@ def strip_code_fences(text: str) -> str:
     return s
 
 def parse_json_or_raise(text: str) -> Dict[str, Any]:
+    """Parse JSON from text, handling markdown code fences and providing better error messages."""
+    import re
+    
+    # First try direct JSON parse
     try:
         return json.loads(text)
-    except Exception:
-        return json.loads(strip_code_fences(text))  # second attempt
+    except json.JSONDecodeError as e1:
+        # Try stripping code fences and parse again
+        cleaned = strip_code_fences(text)
+        try:
+            return json.loads(cleaned)
+        except json.JSONDecodeError as e2:
+            # Try to extract JSON from markdown code blocks
+            json_match = re.search(r'```(?:json)?\n(.*?)\n```', text, re.DOTALL)
+            if json_match:
+                try:
+                    return json.loads(json_match.group(1))
+                except json.JSONDecodeError as e3:
+                    log.error(f"Failed to parse JSON after markdown extraction: {e3}")
+                    log.debug(f"Problematic text: {text}")
+                    raise ValueError(f"Invalid JSON in markdown code block: {e3}") from e3
+            
+            # If we get here, all parsing attempts failed
+            log.error(f"Failed to parse JSON. First error: {e1}, Second error: {e2}")
+            log.debug(f"Problematic text: {text}")
+            raise ValueError(f"Invalid JSON response. Please ensure the response is valid JSON. Error: {e2}")
 
 # ---------- LLM Client Interface ----------
 class ChatLLM(Protocol):
@@ -265,43 +418,86 @@ class OpenAIChat(ChatLLM):
 
 # Gemini implementation
 class GeminiChat(ChatLLM):
-    def __init__(self, api_key: str):
-        from google import genai
-        import os
+    def __init__(self, api_key: str, model_name: str = "gemini-2.5-flash"):
+        """
+        Initializes the Gemini Chat client.
+
+        Args:
+            api_key: Your Google AI API key.
+            model_name: The name of the model to use (e.g., "gemini-2.5-flash").
+        """
+        if not api_key:
+            raise ValueError("Gemini API key cannot be empty.")
+            
+        # Configure the library with the API key
+        genai.configure(api_key=api_key)
         
-        # Set the API key in the environment
-        os.environ['GEMINI_API_KEY'] = api_key
-        
-        # Initialize the client
-        self.client = genai.Client()
-        self.model_name = "gemini-2.5-flash"  # Using the latest recommended model
+        # Set up the model
+        self.model = genai.GenerativeModel(model_name)
+        self.model_name = model_name
+        log.info(f"GeminiChat initialized with model: {self.model_name}")
 
     def chat(self, *, model: str, messages: Sequence[Dict[str, str]], temperature: float = 0.2) -> str:
-        # Convert messages to a single prompt string
-        prompt = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in messages)
+        """
+        Generates a response using the Gemini model.
+
+        Note: The 'model' parameter is ignored as the model is set during initialization.
+        """
+        # Extract system and user messages
+        system_messages = [m['content'] for m in messages if m['role'] == 'system']
+        user_messages = [m['content'] for m in messages if m['role'] == 'user']
         
+        # Combine system and user messages with appropriate formatting
+        prompt = ""
+        if system_messages:
+            prompt += "\n".join(system_messages) + "\n\n"
+        prompt += "\n".join(user_messages)
+        
+        generation_config = genai.types.GenerationConfig(
+            temperature=temperature,
+            top_p=0.95,
+            top_k=40,
+            max_output_tokens=2048,
+        )
+
         try:
-            # Generate content using the client
-            response = self.client.models.generate_content(
-                model=model or self.model_name,
-                contents=prompt,
-                generation_config={
-                    "temperature": temperature,
-                    "top_p": 0.95,
-                    "top_k": 40,
-                    "max_output_tokens": 2048,
-                }
+            response = self.model.generate_content(
+                prompt,
+                generation_config=generation_config,
+                stream=False
             )
+            # Log the full response for debugging
+            log.debug(f"Gemini API response: {response}")
+
+            # Handle response with candidates
+            if hasattr(response, 'candidates') and response.candidates:
+                for candidate in response.candidates:
+                    if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                        text_parts = []
+                        for part in candidate.content.parts:
+                            if hasattr(part, 'text') and part.text:
+                                text_parts.append(part.text)
+                        if text_parts:
+                            return ' '.join(text_parts)
             
-            # Return the generated text
-            return response.text
+            # Check for safety blocks
+            if hasattr(response, 'prompt_feedback') and hasattr(response.prompt_feedback, 'block_reason'):
+                block_reason = response.prompt_feedback.block_reason
+                log.error(f"Content was blocked due to: {block_reason}")
+                raise RuntimeError(f"Content generation was blocked by safety filters: {block_reason}")
+                
+            # If we get here, log detailed error info
+            log.error(f"Unexpected response format from Gemini: {response}")
+            if hasattr(response, 'prompt_feedback'):
+                log.error(f"Prompt feedback: {response.prompt_feedback}")
+                
+            raise RuntimeError("Could not extract text from Gemini response. Check logs for details.")
             
         except Exception as e:
-            # Provide more detailed error information
-            error_msg = f"Error generating content: {str(e)}"
-            if hasattr(e, 'response') and hasattr(e.response, 'text'):
-                error_msg += f"\nResponse: {e.response.text}"
-            raise RuntimeError(error_msg)
+            log.error(f"Error in Gemini chat: {str(e)}")
+            log.error(f"Traceback: {traceback.format_exc()}")
+            raise RuntimeError(f"Gemini content generation failed: {str(e)}")
+
 
 # ---------- Retry wrapper ----------
 def with_retries(fn: Callable[[], str], attempts: int = 3, base_delay: float = 0.5) -> str:
@@ -425,7 +621,8 @@ REQUIRED FIELDS:
 @dataclass
 class ResourceGenerationService:
     llm: ChatLLM
-    model: str = "gemini-pro"
+    # Use an OpenAI chat model by default; aligned with other services
+    model: str = "gpt-4.1-mini"
     
     def extract_zipcode(self, summary: str) -> Optional[str]:
         """Extract zipcode from patient summary if present."""
@@ -435,122 +632,96 @@ class ResourceGenerationService:
         return zip_match.group(0) if zip_match else None
     
     def generate_resources(self, summary: str) -> Dict[str, Any]:
-        """Generate local resources based on zipcode in summary."""
+        """
+        Generate local resources based on zipcode in summary.
+
+        Args:
+            summary: Patient summary text that may contain a zipcode
+
+        Returns:
+            Dict containing resources or error information
+        """
         zipcode = self.extract_zipcode(summary)
         if not zipcode:
             return {"status": "skipped", "reason": "No zipcode found in summary"}
-            
-        prompt = f"""
-        You are a helpful assistant that finds local resources for families with autistic children.
-        The user is located in zipcode: {zipcode}
-        
-        Given a patient zip code, perform the following steps using web search tools to find appropriate early intervention resources:
-        Step 1: State Identification & Early Intervention Website
 
-        Use web search to identify which state the zip code belongs to
-        Search for the official state early intervention website using queries like:
-
-        "[State name] early intervention program"
-        "[State name] Part C early intervention services"
-        "[State name] developmental disabilities early intervention"
-
-        Verify the website is the official state resource (typically .gov domains)
-
-        Step 2: Metropolitan Area Classification
-
-        Search to determine if the zip code area is classified as metropolitan using queries like:
-
-        "[Zip code] metropolitan statistical area"
-        "[City name] [State] metropolitan area"
-        "[Zip code] urban vs rural classification"
-
-        Define metropolitan = yes if the area is part of a Metropolitan Statistical Area (MSA)
-        Define metropolitan = no if classified as rural or non-metropolitan
-
-        Step 3: Search Distance Parameters
-
-        If metropolitan = yes: Search within 3 miles radius
-        If metropolitan = no: Search within 20 miles radius
-
-        Step 4: Behavioral Therapists/ABA Groups Search
-        Search for highly-rated behavioral therapy providers using these query patterns:
-
-        "ABA therapy [city name] [state] reviews rating"
-        "behavioral therapist autism [zip code] highly rated"
-        "applied behavior analysis [city name] 4+ stars"
-        "behavioral therapy near [zip code] top rated"
-
-        Filtering criteria:
-
-        Must have 4.2+ star rating (or equivalent high rating)
-        Must be within the determined distance radius
-        Prioritize providers that specialize in autism/developmental disabilities
-        Include contact information when available
-        Do not include any providers with fewer than 3 reviews
-        Only include the top 5 providers
-
-        Step 5: Speech Therapists Search
-        Search for highly-rated speech therapy providers using these query patterns:
-
-        "speech therapist [city name] [state] reviews rating"
-        "speech language pathologist [zip code] highly rated"
-        "pediatric speech therapy [city name] 4+ stars"
-        "speech therapy near [zip code] top rated"
-
-        Filtering criteria:
-
-        Must have 4.2+ star rating (or equivalent high rating)
-        Must be within the determined distance radius
-        Prioritize pediatric or developmental speech therapists
-        Include contact information when available
-        Do not include any providers with fewer than 3 reviews
-        Only include the top 5 providers, or as many fit the criteria
-
-        Use multiple search queries to ensure comprehensive results
-        Cross-reference provider information across multiple sources
-        Verify current ratings and contact information
-        Include backup providers in case primary recommendations are unavailable
-        Note if any providers have specific insurance requirements or waiting lists
-        
-        Format your response in 3 sections, one for Early Intervention Resource, Behavioral Therapists, and Speech Therapists, as a JSON object with this structure:
-        {{
-            "resources": [
-                {{
-                    "name": "Resource Name",
-                    "type": "support_group|specialist|therapy|education",
-                    "rating": "1-5",
-                    "location": "City, State",
-                    "website": "Website if available",
-                    "phone_number": "Phone number if available",
-                    "specialities": "Brief description"
-                }}
-            ],
-            "zipcode": "{zipcode}",
-            "generated_at": "ISO timestamp"
-        }}
-        """
-        
-        messages = [
-            {"role": "system", "content": "You help families find local autism resources."},
-            {"role": "user", "content": prompt}
-        ]
-        
         try:
+            # Prepare the prompt without using .format() to avoid brace parsing issues
+            user_prompt = f"{RESOURCE_GENERATION_PROMPT}\n\nUse this ZIP code for the task: {zipcode}"
+
+            messages = [
+                {"role": "user", "content": user_prompt}
+            ]
+
+            # Log the request for debugging
+            log.debug(f"Sending request to LLM with zipcode: {zipcode}")
+            
+            # Get response from LLM
             response = self.llm.chat(
                 model=self.model,
                 messages=messages,
                 temperature=0.2
             )
-            return json.loads(response)
+            
+            # Log the raw response for debugging
+            log.debug(f"Raw LLM response: {response}")
+
+            # Parse and validate the response
+            try:
+                response_data = parse_json_or_raise(response)
+
+                # Normalize possible shapes from LLM
+                if isinstance(response_data, dict):
+                    # If camelCase key is used
+                    if "summaryReport" in response_data and "summary_report" not in response_data:
+                        response_data = {"summary_report": response_data["summaryReport"]}
+                    # If a bare SummaryReport object is returned, wrap it
+                    elif "summary_report" not in response_data and all(k in response_data for k in [
+                        "patient_location", "metropolitan_status", "search_radius_miles",
+                        "state_early_intervention_program","behavioral_providers",
+                        "speech_providers"
+                    ]):
+                        response_data = {"summary_report": response_data}
+
+                validated_response = ResourceFinderResult.model_validate(response_data)
+                
+                # Convert back to dict for API response
+                result = validated_response.model_dump()
+                result["status"] = "success"
+                return result
+                
+            except (json.JSONDecodeError, ValueError) as je:
+                log.error(f"Failed to parse JSON response: {je}")
+                log.debug(f"Response that failed to parse: {response}")
+                return {
+                    "status": "error", 
+                    "message": f"Failed to parse resource data: {str(je)}",
+                    "raw_response": response[:500]  # Include first 500 chars for debugging
+                }
+                
+            except ValidationError as ve:
+                log.error(f"Response validation failed: {ve}")
+                log.debug(f"Response that failed validation: {response}")
+                return {
+                    "status": "error", 
+                    "message": f"Invalid resource data format: {str(ve)}",
+                    "raw_response": response[:500]  # Include first 500 chars for debugging
+                }
+            
         except Exception as e:
-            log.error(f"Resource generation failed: {str(e)}")
-            return {"status": "error", "message": str(e)}
+            error_msg = f"Resource generation failed: {str(e)}"
+            log.error(error_msg, exc_info=True)
+            return {
+                "status": "error", 
+                "message": error_msg,
+                "error_type": e.__class__.__name__
+            }
 
 # ---------- AutoGen Adapter (optional) ----------
 class AutoGenAdapter:
     """
     Optional adapter that wraps autogen_agentchat agents and exposes a simple process() API.
-    Lazily imports AutoGen at init time to keep this module importable without the dep.
+{{ ... }}
     """
     def __init__(
         self,

@@ -1,0 +1,398 @@
+{
+    "kb_id": "c2385e91-a7a3-45b2-9870-90f398996bfb",
+    "title": "Prioritized Interventions for Neurodevelopmental Symptoms \u2014 Knowledge Base",
+    "version": "1.0",
+    "created_at": "2025-10-07T18:12:33.486619",
+    "source_document": "Plan for Viable Intervention Recommendations.docx",
+    "modeling_principles": {
+      "approach": "foundation_first",
+      "pillars": [
+        "Gastrointestinal health & nutrition",
+        "Metabolic & mitochondrial function",
+        "Detoxification & inflammation regulation"
+      ],
+      "notes": [
+        "View symptoms as downstream signals of upstream imbalances.",
+        "Start with least invasive, system-level interventions before targeted/complex care.",
+        "Use genetics as a vulnerability map; environment & nutrition can modulate expression."
+      ]
+    },
+    "symptom_catalog": [
+      {
+        "symptom": "Speech Delay",
+        "aliases": [
+          "Lack of Speech",
+          "Expressive Language Delay"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Methylation Support",
+            "aka": [
+              "Methyl-B12",
+              "Folinic Acid / 5-MTHF"
+            ],
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Supports neurotransmitter synthesis and DNA repair; addresses folate/B12 pathway vulnerabilities including CFD.",
+            "key_targets": [
+              "MTHFR",
+              "MTRR",
+              "FOLR1"
+            ],
+            "safety_notes": "Dosing and form selection require clinician guidance."
+          },
+          {
+            "name": "Mitochondrial Support",
+            "aka": [
+              "L-Carnitine",
+              "CoQ10",
+              "Alpha-Lipoic Acid",
+              "B-complex \u2018mito cocktail\u2019"
+            ],
+            "priority": 2,
+            "difficulty_1to4": 2,
+            "rationale": "Improves cellular ATP availability for energy-intensive language acquisition.",
+            "safety_notes": "Combine nutrients thoughtfully; monitor tolerance."
+          }
+        ]
+      },
+      {
+        "symptom": "Developmental Delays",
+        "aliases": [
+          "Global Developmental Delay"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Elimination Diet",
+            "aka": [
+              "Gluten-free",
+              "Casein-free",
+              "Soy-free"
+            ],
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Reduces food-driven gut inflammation and permeability that can impair cognition."
+          },
+          {
+            "name": "Thyroid Function Assessment",
+            "priority": 2,
+            "difficulty_1to4": 3,
+            "rationale": "Thyroid hormones are master regulators of neurodevelopment; screen for hypo/autoimmunity."
+          }
+        ]
+      },
+      {
+        "symptom": "Sleep Problems",
+        "aliases": [
+          "Insomnia",
+          "Frequent Night Waking"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Magnesium + Gut Support",
+            "aka": [
+              "Magnesium glycinate",
+              "Epsom baths",
+              "Probiotics"
+            ],
+            "priority": 1,
+            "difficulty_1to4": 1,
+            "rationale": "Magnesium supports GABAergic calming; probiotics address dysbiosis and serotonin-melatonin axis."
+          },
+          {
+            "name": "Vitamin D Assessment & Supplementation",
+            "priority": 2,
+            "difficulty_1to4": 2,
+            "rationale": "Vitamin D receptors in sleep-regulatory regions; deficiency correlates with poor sleep quality."
+          }
+        ]
+      },
+      {
+        "symptom": "Irritability/Aggression",
+        "aliases": [
+          "Meltdowns",
+          "Externalizing Behaviors"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Gut Health Investigation + Elimination Diet",
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Unrecognized GI pain and inflammation frequently drive severe irritability/aggression."
+          },
+          {
+            "name": "Magnesium Supplementation",
+            "priority": 2,
+            "difficulty_1to4": 1,
+            "rationale": "Supports conversion of glutamate to GABA; calms neuromuscular irritability."
+          }
+        ]
+      },
+      {
+        "symptom": "Anxiety/OCD",
+        "aliases": [
+          "Obsessive-Compulsive Features",
+          "Separation Anxiety"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Gut Microbiome Support",
+            "aka": [
+              "Multi-strain probiotics",
+              "Prebiotic foods"
+            ],
+            "priority": 1,
+            "difficulty_1to4": 1,
+            "rationale": "Targets gut-brain axis and low-grade inflammation impacting mood and anxiety."
+          },
+          {
+            "name": "PANS/PANDAS Investigation (if acute onset)",
+            "priority": 2,
+            "difficulty_1to4": 4,
+            "rationale": "Autoimmune neuropsychiatric syndrome post-infection requires urgent, distinct medical care."
+          }
+        ]
+      },
+      {
+        "symptom": "Sensory Processing Issues",
+        "aliases": [
+          "SPD",
+          "Sensory Over/Under-Responsivity"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Elimination Diet & Gut Support",
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Reduces inflammatory load and supports neurotransmitter balance affecting sensory gating."
+          },
+          {
+            "name": "Magnesium + Vitamin B6 (P5P)",
+            "priority": 2,
+            "difficulty_1to4": 1,
+            "rationale": "Cofactors for GABA synthesis and NMDA modulation; may reduce hyperexcitability."
+          }
+        ]
+      },
+      {
+        "symptom": "Toe Walking",
+        "aliases": [
+          "Equinus Gait (behavioral/functional)"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "GI Motility Support",
+            "aka": [
+              "Constipation clean-out",
+              "Hydration",
+              "Fiber",
+              "Magnesium citrate"
+            ],
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Postural adaptation to abdominal pain/impaction is common; resolve pain first."
+          },
+          {
+            "name": "Mineral Support",
+            "aka": [
+              "Magnesium",
+              "Zinc"
+            ],
+            "priority": 2,
+            "difficulty_1to4": 1,
+            "rationale": "Addresses neuromuscular irritability and motor control co-factors."
+          }
+        ]
+      },
+      {
+        "symptom": "Stimming",
+        "aliases": [
+          "Self-Stimulatory Behavior",
+          "Repetitive Behaviors"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Gut Dysbiosis/Yeast Investigation",
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Candida/pathogen metabolites and GI discomfort can escalate self-regulatory behaviors."
+          },
+          {
+            "name": "Mineral Deficiency Assessment",
+            "aka": [
+              "Zinc",
+              "Iron (ferritin)",
+              "Copper balance"
+            ],
+            "priority": 2,
+            "difficulty_1to4": 2,
+            "rationale": "Deficiencies impact neurotransmission and restlessness."
+          }
+        ]
+      },
+      {
+        "symptom": "Echolalia",
+        "aliases": [
+          "Scripting (non-functional)"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Reduce Excess Glutamate Load",
+            "aka": [
+              "Dietary MSG reduction",
+              "Magnesium + P5P",
+              "L-theanine (consider)"
+            ],
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Targets excitation-inhibition imbalance implicated in repetitive verbalization."
+          },
+          {
+            "name": "Investigate Low Cholesterol",
+            "priority": 2,
+            "difficulty_1to4": 3,
+            "rationale": "Cholesterol supports myelination and membrane signaling; low levels correlate with neuroinstability."
+          }
+        ]
+      },
+      {
+        "symptom": "Picky Eating",
+        "aliases": [
+          "Severe Food Selectivity"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Address Zinc Deficiency",
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Zinc supports gustatory function; deficiency alters taste and perpetuates selectivity."
+          },
+          {
+            "name": "Treat GI Discomfort",
+            "aka": [
+              "Reflux management",
+              "Dysbiosis treatment"
+            ],
+            "priority": 2,
+            "difficulty_1to4": 2,
+            "rationale": "Food-pain association drives refusal; address underlying pathology."
+          }
+        ]
+      },
+      {
+        "symptom": "Pica",
+        "aliases": [
+          "Non-food Ingestion"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Mineral Deficiency Assessment",
+            "aka": [
+              "Iron panel with ferritin",
+              "Zinc"
+            ],
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Pica frequently resolves when iron/zinc deficiencies are corrected."
+          },
+          {
+            "name": "Gut Pathogen Screening",
+            "aka": [
+              "Parasites",
+              "Yeast"
+            ],
+            "priority": 2,
+            "difficulty_1to4": 3,
+            "rationale": "Pathogens can alter cravings and worsen malabsorption."
+          }
+        ]
+      },
+      {
+        "symptom": "Hyperlexia",
+        "aliases": [
+          "Word-Calling Without Comprehension"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Speech & Language Therapy (Comprehension-Focused)",
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Bridges decoding-comprehension gap using visual strengths to teach meaning and pragmatics."
+          },
+          {
+            "name": "Occupational Therapy",
+            "aka": [
+              "Sensory Integration",
+              "Social readiness"
+            ],
+            "priority": 2,
+            "difficulty_1to4": 2,
+            "rationale": "Addresses sensory regulation and motor planning to support engagement."
+          }
+        ]
+      },
+      {
+        "symptom": "Hypotonia",
+        "aliases": [
+          "Low Muscle Tone"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Mitochondrial Support (\u2018Mito Cocktail\u2019)",
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Supports ATP generation in energy-demanding muscle tissue."
+          },
+          {
+            "name": "Carnitine Supplementation",
+            "priority": 2,
+            "difficulty_1to4": 2,
+            "rationale": "Facilitates fatty acid transport into mitochondria; improves strength/endurance."
+          }
+        ]
+      },
+      {
+        "symptom": "Inattention/Focus",
+        "aliases": [
+          "Distractibility",
+          "Executive Attention"
+        ],
+        "prioritized_interventions": [
+          {
+            "name": "Elimination Diet (remove dyes & common allergens)",
+            "priority": 1,
+            "difficulty_1to4": 2,
+            "rationale": "Reduces neuro-irritants and low-grade inflammation that impair attention."
+          },
+          {
+            "name": "Omega-3 Fatty Acid Supplementation",
+            "aka": [
+              "EPA/DHA fish oil"
+            ],
+            "priority": 2,
+            "difficulty_1to4": 1,
+            "rationale": "Supports membrane fluidity, neurotransmission, and anti-inflammatory signaling."
+          }
+        ]
+      }
+    ],
+    "triage_rules": [
+      "If Anxiety/OCD has abrupt, severe onset post-infection: prioritize PANS/PANDAS workup immediately.",
+      "Before behavior-focused plans, rule out pain (especially GI), sleep deficit, and mineral deficiencies.",
+      "When initiating multi-supplement protocols, add one change at a time; monitor response for 1\u20133 weeks."
+    ],
+    "retrieval_tags": [
+      "ASD",
+      "functional_medicine",
+      "gut_brain_axis",
+      "mitochondria",
+      "sleep",
+      "dietary_intervention",
+      "minerals",
+      "vitamins",
+      "speech",
+      "sensory",
+      "behavior"
+    ]
+  }
+  

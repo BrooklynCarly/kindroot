@@ -54,6 +54,14 @@ def load_functional_medicine_asd() -> Dict[str, Any]:
     """
     return load_kb_file("functional_medicine_asd.json")
 
+def load_interventions() -> Dict[str, Any]:
+    """
+    Load the Interventions KB.
+    
+    Returns:
+        Full KB structure with interventions
+    """
+    return load_kb_file("interventions.json")
 
 def get_symptom_mappings() -> List[Dict[str, Any]]:
     """
