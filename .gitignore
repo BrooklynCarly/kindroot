@@ -38,6 +38,14 @@ ENV/
 backend/.env
 backend/instance/
 
+# Google API Credentials (contains secrets)
+backend/credentials.json
+backend/client_secret.json
+backend/token.json
+credentials.json
+client_secret.json
+token.json
+
 # Logs
 *.log
 

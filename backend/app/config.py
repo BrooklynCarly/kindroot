@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     GOOGLE_SHEET_ID: str = os.getenv("GOOGLE_SHEET_ID", "")
     
     # Security
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     
     class Config:
