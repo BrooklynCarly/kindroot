@@ -197,8 +197,6 @@ Return ONLY a single valid JSON object matching the `SummaryReport` schema. Do n
 ```
 """
 
-PEDIATRICIAN_FINDER_PROMPT = """You are a helpful research assistant. """
-
 # ---------- Schemas ----------
 class TriageItem(BaseModel):
     severity: Literal["URGENT (HIGH)", "MODERATE"]
@@ -415,88 +413,6 @@ class OpenAIChat(ChatLLM):
     def chat(self, *, model: str, messages: Sequence[Dict[str, str]], temperature: float = 0.2) -> str:
         resp = self._client.chat.completions.create(model=model, messages=messages, temperature=temperature)
         return resp.choices[0].message.content
-
-# Gemini implementation
-class GeminiChat(ChatLLM):
-    def __init__(self, api_key: str, model_name: str = "gemini-2.5-flash"):
-        """
-        Initializes the Gemini Chat client.
-
-        Args:
-            api_key: Your Google AI API key.
-            model_name: The name of the model to use (e.g., "gemini-2.5-flash").
-        """
-        if not api_key:
-            raise ValueError("Gemini API key cannot be empty.")
-            
-        # Configure the library with the API key
-        genai.configure(api_key=api_key)
-        
-        # Set up the model
-        self.model = genai.GenerativeModel(model_name)
-        self.model_name = model_name
-        log.info(f"GeminiChat initialized with model: {self.model_name}")
-
-    def chat(self, *, model: str, messages: Sequence[Dict[str, str]], temperature: float = 0.2) -> str:
-        """
-        Generates a response using the Gemini model.
-
-        Note: The 'model' parameter is ignored as the model is set during initialization.
-        """
-        # Extract system and user messages
-        system_messages = [m['content'] for m in messages if m['role'] == 'system']
-        user_messages = [m['content'] for m in messages if m['role'] == 'user']
-        
-        # Combine system and user messages with appropriate formatting
-        prompt = ""
-        if system_messages:
-            prompt += "\n".join(system_messages) + "\n\n"
-        prompt += "\n".join(user_messages)
-        
-        generation_config = genai.types.GenerationConfig(
-            temperature=temperature,
-            top_p=0.95,
-            top_k=40,
-            max_output_tokens=2048,
-        )
-
-        try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config=generation_config,
-                stream=False
-            )
-            # Log the full response for debugging
-            log.debug(f"Gemini API response: {response}")
-
-            # Handle response with candidates
-            if hasattr(response, 'candidates') and response.candidates:
-                for candidate in response.candidates:
-                    if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
-                        text_parts = []
-                        for part in candidate.content.parts:
-                            if hasattr(part, 'text') and part.text:
-                                text_parts.append(part.text)
-                        if text_parts:
-                            return ' '.join(text_parts)
-            
-            # Check for safety blocks
-            if hasattr(response, 'prompt_feedback') and hasattr(response.prompt_feedback, 'block_reason'):
-                block_reason = response.prompt_feedback.block_reason
-                log.error(f"Content was blocked due to: {block_reason}")
-                raise RuntimeError(f"Content generation was blocked by safety filters: {block_reason}")
-                
-            # If we get here, log detailed error info
-            log.error(f"Unexpected response format from Gemini: {response}")
-            if hasattr(response, 'prompt_feedback'):
-                log.error(f"Prompt feedback: {response.prompt_feedback}")
-                
-            raise RuntimeError("Could not extract text from Gemini response. Check logs for details.")
-            
-        except Exception as e:
-            log.error(f"Error in Gemini chat: {str(e)}")
-            log.error(f"Traceback: {traceback.format_exc()}")
-            raise RuntimeError(f"Gemini content generation failed: {str(e)}")
 
 
 # ---------- Retry wrapper ----------

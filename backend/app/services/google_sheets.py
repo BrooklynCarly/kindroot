@@ -6,8 +6,13 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from pathlib import Path
 from fastapi import HTTPException
+import time
+import socket
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+
+# Set socket timeout to 30 seconds
+socket.setdefaulttimeout(30)
 
 # Get the directory of the current file (backend/)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +49,64 @@ class GoogleSheetsService:
             str(CREDENTIALS_FILE), scopes=SCOPES
         )
         return creds
+    
+    def expand_sheet_columns(self, sheet_name: str, num_columns: int):
+        """
+        Expand the sheet to have at least num_columns columns.
+        
+        Args:
+            sheet_name: Name of the sheet to expand
+            num_columns: Minimum number of columns needed
+        """
+        try:
+            # Get sheet metadata
+            spreadsheet = self.service.spreadsheets().get(
+                spreadsheetId=self.spreadsheet_id
+            ).execute()
+            
+            # Find the sheet by name
+            sheet_id = None
+            current_columns = 0
+            for sheet in spreadsheet.get('sheets', []):
+                if sheet['properties']['title'] == sheet_name:
+                    sheet_id = sheet['properties']['sheetId']
+                    current_columns = sheet['properties']['gridProperties']['columnCount']
+                    break
+            
+            if sheet_id is None:
+                raise ValueError(f"Sheet '{sheet_name}' not found")
+            
+            # Only expand if needed
+            if current_columns >= num_columns:
+                return
+            
+            # Expand the sheet
+            request = {
+                'requests': [{
+                    'updateSheetProperties': {
+                        'properties': {
+                            'sheetId': sheet_id,
+                            'gridProperties': {
+                                'columnCount': num_columns
+                            }
+                        },
+                        'fields': 'gridProperties.columnCount'
+                    }
+                }]
+            }
+            
+            self.service.spreadsheets().batchUpdate(
+                spreadsheetId=self.spreadsheet_id,
+                body=request
+            ).execute()
+            
+            print(f"Expanded sheet '{sheet_name}' from {current_columns} to {num_columns} columns")
+            
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error expanding sheet: {str(e)}"
+            )
 
     def read_sheet(self, range_name: str) -> List[List[Any]]:
         """
