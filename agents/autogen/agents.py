@@ -403,8 +403,8 @@ class PatientLocation(BaseModel):
 
 class SummaryReport(BaseModel):
     patient_location: PatientLocation
-    metropolitan_status: Literal["Yes", "No"]
-    search_radius_miles: int
+    metropolitan_status: Optional[Literal["Yes", "No"]] = None
+    search_radius_miles: Optional[int] = None
     state_early_intervention_program: StateEIRProgram
     pediatricians: Optional[List[Provider]] = None
     behavioral_providers: List[Provider]

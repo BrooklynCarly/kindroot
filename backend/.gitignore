@@ -32,6 +32,7 @@ env/
 # Google API credentials
 token.pickle
 credentials.json
+client_secret.json
 
 # IDE
 .idea/

@@ -234,19 +234,14 @@ class GoogleDocsService:
             index += len(full_text)
         
         # Add disclaimer block at the top
-        add_paragraph("We are parents helping parents navigate the tough conversations.")
+        add_paragraph("We are parents helping parents navigate tough conversations.")
         
-        add_paragraph("What this is—and isn't", "HEADING_2")
-        add_paragraph("This report shares information and resources to discuss with your healthcare provider. It is not medical advice, a diagnosis, or a treatment plan.")
+        add_paragraph("What this is—and isn't: This report shares information and resources to discuss with your healthcare provider. It is not medical advice, a diagnosis, or a treatment plan.")
         
-        add_paragraph("What to know", "HEADING_2")
-        add_paragraph("Your kiddo is unique. What helps one child may not fit another.")
-        add_paragraph("")  # Empty line for spacing
-        add_paragraph("You'll see ideas from reputable clinical sources and from families who've been there. Use these insights to prepare for conversations with your child's clinician.")
-        add_paragraph("")  # Empty line for spacing
+        add_paragraph("What to know: Your kiddo is unique. What helps one child may not fit another, but we aim to find information from families with kids similar to yours. You'll see ideas from reputable clinical sources and from families who've been there. Use these insights to prepare for conversations with your child's clinician.")
         
         # Demographic Information Section
-        add_paragraph("Demographic Information", "HEADING_1")
+        add_paragraph("Your Information", "HEADING_2")
         
         # Parent/contact info from sheet
         date_submitted = patient_info.get('date_submitted')
@@ -308,7 +303,7 @@ class GoogleDocsService:
         
         # Hypotheses Section
         # Top 3 Potential Root Causes (parent-friendly)
-        add_paragraph("Top 3 Potential Root Causes", "HEADING_1")
+        add_paragraph("Top 3 Potential Root Causes", "HEADING_2")
         hypotheses_list = hypotheses.get('hypotheses', [])
         if hypotheses_list:
             for i, hyp in enumerate(hypotheses_list[:3], 1):
@@ -342,20 +337,20 @@ class GoogleDocsService:
         # Next steps and uncertainties are at the top level, not per hypothesis
         uncertainties = hypotheses.get('uncertainties', [])
         if uncertainties:
-            add_paragraph("Uncertainties", "HEADING_2")
+            add_paragraph("Uncertainties", "HEADING_3")
             for i, uncertainty in enumerate(uncertainties, 1):
                 add_paragraph(f"{i}. {uncertainty}")
             add_paragraph("")
         
         next_steps = hypotheses.get('next_steps', [])
         if next_steps:
-            add_paragraph("Recommended Next Steps", "HEADING_2")
+            add_paragraph("Recommended Next Steps", "HEADING_3")
             for i, step in enumerate(next_steps, 1):
                 add_paragraph(f"{i}. {step}")
             add_paragraph("")
         
         # Resources Section
-        add_paragraph("Local Resources", "HEADING_1")
+        add_paragraph("Local Resources", "HEADING_2")
         
         # Check if resources generation was skipped
         if resources.get('status') == 'skipped':
@@ -378,7 +373,7 @@ class GoogleDocsService:
                 # State Early Intervention Program
                 ei_program = summary_report.get('state_early_intervention_program', {})
                 if ei_program:
-                    add_paragraph("State Early Intervention Program", "HEADING_2")
+                    add_paragraph("State Early Intervention Program", "HEADING_4")
                     website = ei_program.get('website')
                     if website:
                         add_link("Website", website)
@@ -386,13 +381,12 @@ class GoogleDocsService:
                         add_paragraph(f"Phone: {ei_program.get('contact_phone')}")
                     if ei_program.get('contact_email'):
                         add_paragraph(f"Email: {ei_program.get('contact_email')}")
-                    add_paragraph("")
                 # Pediatricians / Developmental Pediatrics
                 peds = summary_report.get('pediatricians', [])
                 if peds:
-                    add_paragraph("Pediatricians / Developmental Pediatrics", "HEADING_2")
+                    add_paragraph("Pediatricians / Developmental Pediatrics", "HEADING_4")
                     for i, provider in enumerate(peds, 1):
-                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_3")
+                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
                         rating = provider.get('rating'); reviews = provider.get('review_count')
                         if rating is not None:
                             txt = f"Rating: {rating:.1f}/5.0"
@@ -406,14 +400,13 @@ class GoogleDocsService:
                         if provider.get('specialties'):
                             add_paragraph("Specialties: " + ', '.join(provider['specialties']))
                         add_paragraph("")
-                    add_paragraph("")
 
                 # Behavioral Providers
                 behavioral_providers = summary_report.get('behavioral_providers', [])
                 if behavioral_providers:
-                    add_paragraph("Behavioral Providers", "HEADING_2")
+                    add_paragraph("Behavioral Providers", "HEADING_4")
                     for i, provider in enumerate(behavioral_providers, 1):
-                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_3")
+                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
                         
                         # Rating and reviews
                         rating = provider.get('rating')
@@ -441,14 +434,13 @@ class GoogleDocsService:
                         if provider.get('specialties'):
                             specialties = ', '.join(provider.get('specialties', []))
                             add_paragraph(f"Specialties: {specialties}")
-                        add_paragraph("")
                 
                 # Speech Providers
                 speech_providers = summary_report.get('speech_providers', [])
                 if speech_providers:
-                    add_paragraph("Speech Providers", "HEADING_2")
+                    add_paragraph("Speech Providers", "HEADING_4")
                     for i, provider in enumerate(speech_providers, 1):
-                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_3")
+                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
                         
                         # Rating and reviews
                         rating = provider.get('rating')
@@ -476,19 +468,18 @@ class GoogleDocsService:
                         if provider.get('specialties'):
                             specialties = ', '.join(provider.get('specialties', []))
                             add_paragraph(f"Specialties: {specialties}")
-                        add_paragraph("")
                 
                 # If undiagnosed, add “Where to obtain an evaluation”
                 diag_status = (patient_info.get('diagnosis_status') or "").strip().lower()
                 if diag_status in ("", "undiagnosed", "unknown", "none"):
-                    add_paragraph("Where to Obtain a Diagnostic Evaluation", "HEADING_1")
+                    add_paragraph("Where to Obtain a Diagnostic Evaluation", "HEADING_3")
                     add_paragraph("If you do not yet have an evaluation, here is a place to get started:")
                     add_link("ADG Cares", "https://www.adgcares.com/")
 
                 # Additional Notes
                 notes = summary_report.get('additional_notes', [])
                 if notes:
-                    add_paragraph("Additional Notes", "HEADING_2")
+                    add_paragraph("Additional Notes", "HEADING_4")
                     for note in notes:
                         add_paragraph(f"• {note}")
                     add_paragraph("")

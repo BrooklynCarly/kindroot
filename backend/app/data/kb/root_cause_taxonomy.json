@@ -1,0 +1,800 @@
+{
+  "version": "1.0.0",
+  "updated": "2025-11-04",
+  "license": "CC-BY-4.0",
+  "purpose": "Parent-facing, non-diagnostic taxonomy for mapping symptom clusters to potential underlying contributors to discuss with a pediatrician. Not medical advice or a diagnosis.",
+  "items": [
+    {
+      "id": "sleep_disordered_breathing",
+      "label": "Sleep-Disordered Breathing Consideration",
+      "synonyms": [
+        "obstructive sleep apnea",
+        "OSA",
+        "snoring with mouth breathing",
+        "adenoids/tonsils"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "snoring",
+        "mouth_breathing",
+        "restless_sleep",
+        "night_waking",
+        "daytime_irritability",
+        "hyperactivity_or_inattention"
+      ],
+      "contradictors": [
+        "quiet_nasal_breathing",
+        "refreshing_sleep"
+      ],
+      "first_line_tests": [
+        "Pediatric sleep study (polysomnography)",
+        "ENT evaluation for tonsils/adenoids"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "sleep_medicine",
+        "ENT"
+      ]
+    },
+    {
+      "id": "iron_deficiency",
+      "label": "Iron-Related Consideration (including low ferritin)",
+      "synonyms": [
+        "low iron stores",
+        "low ferritin",
+        "iron deficiency anemia"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "pica",
+        "pallor",
+        "fatigue",
+        "restless_sleep",
+        "limb_kicking",
+        "poor_attention"
+      ],
+      "contradictors": [
+        "normal ferritin on recent labs"
+      ],
+      "first_line_tests": [
+        "Ferritin",
+        "CBC",
+        "Iron panel (serum iron, TIBC, transferrin saturation)"
+      ],
+      "specialist_types": [
+        "pediatrics"
+      ]
+    },
+    {
+      "id": "vitamin_d_insufficiency",
+      "label": "Vitamin D Insufficiency Consideration",
+      "synonyms": [
+        "low 25-OH vitamin D"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "limited_sun_exposure",
+        "low_dietary_intake",
+        "frequent_illness"
+      ],
+      "contradictors": [
+        "normal 25-OH vitamin D on recent labs"
+      ],
+      "first_line_tests": [
+        "25-hydroxyvitamin D (25-OH)"
+      ],
+      "specialist_types": [
+        "pediatrics"
+      ]
+    },
+    {
+      "id": "thyroid_dysfunction",
+      "label": "Thyroid Function Consideration",
+      "synonyms": [
+        "hypothyroid consideration",
+        "thyroid imbalance"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "fatigue",
+        "constipation",
+        "dry_skin",
+        "cold_intolerance",
+        "growth_concerns"
+      ],
+      "contradictors": [
+        "normal TSH and free T4 on recent labs"
+      ],
+      "first_line_tests": [
+        "TSH",
+        "Free T4"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "endocrinology"
+      ]
+    },
+    {
+      "id": "lead_exposure",
+      "label": "Lead Exposure Risk Consideration",
+      "synonyms": [
+        "elevated blood lead",
+        "lead risk"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "older_housing_pre_1978",
+        "renovation_dust",
+        "pica",
+        "developmental_concerns"
+      ],
+      "contradictors": [
+        "recent venous lead level is low"
+      ],
+      "first_line_tests": [
+        "Blood lead level (venous)"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "public_health"
+      ]
+    },
+    {
+      "id": "hearing_impairment",
+      "label": "Hearing Differences Consideration",
+      "synonyms": [
+        "hearing loss consideration",
+        "auditory issues"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "speech_delay",
+        "does_not_respond_to_name",
+        "history_of_ear_infections"
+      ],
+      "contradictors": [
+        "recent normal audiology"
+      ],
+      "first_line_tests": [
+        "Audiology screen",
+        "Tympanometry"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "audiology",
+        "ENT"
+      ]
+    },
+    {
+      "id": "recurrent_otitis_media_effusion",
+      "label": "Middle Ear Fluid / Recurrent Ear Infections",
+      "synonyms": [
+        "otitis media with effusion",
+        "glue ear"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12"
+      ],
+      "typical_signals": [
+        "hearing_fluctuations",
+        "speech_delay",
+        "ear_pulling"
+      ],
+      "contradictors": [
+        "clear middle ear exam"
+      ],
+      "first_line_tests": [
+        "Tympanometry",
+        "ENT evaluation"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "ENT"
+      ]
+    },
+    {
+      "id": "vision_impairment",
+      "label": "Vision Differences Consideration",
+      "synonyms": [
+        "visual acuity issues",
+        "strabismus consideration"
+      ],
+      "age_bands": [
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "squinting",
+        "sits_close_to_screens",
+        "bumps_into_objects"
+      ],
+      "contradictors": [
+        "recent normal vision screen"
+      ],
+      "first_line_tests": [
+        "Vision screening",
+        "Comprehensive eye exam"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "ophthalmology"
+      ]
+    },
+    {
+      "id": "constipation_functional",
+      "label": "Constipation/Withholding Discomfort Consideration",
+      "synonyms": [
+        "functional constipation",
+        "stool withholding"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "hard_stools",
+        "painful_bm",
+        "infrequent_bm",
+        "stool_withholding",
+        "abdominal_discomfort",
+        "picky_eating"
+      ],
+      "contradictors": [
+        "soft_regular_stools"
+      ],
+      "first_line_tests": [
+        "Clinical evaluation; Bristol stool chart"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "gastroenterology"
+      ]
+    },
+    {
+      "id": "gastroesophageal_reflux",
+      "label": "Reflux/Regurgitation Consideration",
+      "synonyms": [
+        "GER",
+        "GERD symptoms"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12"
+      ],
+      "typical_signals": [
+        "arching_after_feeds",
+        "spit_up",
+        "throat_clearing",
+        "cough_at_night"
+      ],
+      "contradictors": [
+        "no reflux-like behaviors"
+      ],
+      "first_line_tests": [
+        "Clinical evaluation"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "gastroenterology"
+      ]
+    },
+    {
+      "id": "lactose_intolerance",
+      "label": "Lactose Sensitivity Consideration",
+      "synonyms": [
+        "dairy intolerance"
+      ],
+      "age_bands": [
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "bloating",
+        "gas",
+        "diarrhea_after_dairy"
+      ],
+      "contradictors": [
+        "tolerates dairy without symptoms"
+      ],
+      "first_line_tests": [
+        "Clinical dietary history; optional hydrogen breath test per clinician"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "gastroenterology"
+      ]
+    },
+    {
+      "id": "celiac_gluten_autoimmunity_screen",
+      "label": "Celiac/Gluten Autoimmunity Screen Consideration",
+      "synonyms": [
+        "celiac screening",
+        "gluten autoimmunity"
+      ],
+      "age_bands": [
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "chronic_diarrhea",
+        "poor_growth",
+        "abdominal_pain",
+        "family_history_celiac"
+      ],
+      "contradictors": [
+        "negative serology while on gluten diet"
+      ],
+      "first_line_tests": [
+        "tTG-IgA",
+        "Total IgA"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "gastroenterology"
+      ]
+    },
+    {
+      "id": "microbiome_imbalance_dysbiosis",
+      "label": "Microbiome Imbalance Consideration",
+      "synonyms": [
+        "dysbiosis consideration"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "constipation_or_diarrhea",
+        "bloating",
+        "gas",
+        "abdominal_pain"
+      ],
+      "contradictors": [
+        "consistently normal stools and no GI symptoms"
+      ],
+      "first_line_tests": [
+        "Clinical evaluation; dietary and symptom history"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "gastroenterology"
+      ]
+    },
+    {
+      "id": "seizures_epileptiform_consideration",
+      "label": "Seizure/Epileptiform Activity Consideration",
+      "synonyms": [
+        "staring spells",
+        "possible seizures"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "unresponsive_staring",
+        "sudden_behavioral_pauses",
+        "post_event_confusion",
+        "regression"
+      ],
+      "contradictors": [
+        "no events and normal neuro exam per clinician"
+      ],
+      "first_line_tests": [
+        "Discuss pediatric neurology consult",
+        "EEG per clinician"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "neurology"
+      ]
+    },
+    {
+      "id": "cerebral_folate_consideration",
+      "label": "Cerebral Folate Consideration",
+      "synonyms": [
+        "folate receptor autoantibodies",
+        "FRAT"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "sleep_fragmentation",
+        "irritability",
+        "language_delay",
+        "feeding_difficulties"
+      ],
+      "contradictors": [
+        "no overlapping symptoms and normal folate markers per clinician"
+      ],
+      "first_line_tests": [
+        "FRAT (folate receptor alpha autoantibodies)",
+        "Serum folate",
+        "RBC folate"
+      ],
+      "specialist_types": [
+        "pediatrics"
+      ]
+    },
+    {
+      "id": "b12_deficiency",
+      "label": "B12-Related Consideration",
+      "synonyms": [
+        "low B12",
+        "cobalamin deficiency consideration"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "fatigue",
+        "pallor",
+        "irritability"
+      ],
+      "contradictors": [
+        "normal B12 on recent labs"
+      ],
+      "first_line_tests": [
+        "Serum B12"
+      ],
+      "specialist_types": [
+        "pediatrics"
+      ]
+    },
+    {
+      "id": "zinc_deficiency",
+      "label": "Zinc-Related Consideration",
+      "synonyms": [
+        "low zinc"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "picky_eating",
+        "poor_appetite",
+        "dermatitis"
+      ],
+      "contradictors": [
+        "normal zinc on recent labs"
+      ],
+      "first_line_tests": [
+        "Zinc (serum/plasma)"
+      ],
+      "specialist_types": [
+        "pediatrics"
+      ]
+    },
+    {
+      "id": "magnesium_insufficiency",
+      "label": "Magnesium-Related Consideration",
+      "synonyms": [
+        "low magnesium"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "restless_sleep",
+        "constipation"
+      ],
+      "contradictors": [
+        "normal magnesium markers on recent labs"
+      ],
+      "first_line_tests": [
+        "Magnesium (RBC)"
+      ],
+      "specialist_types": [
+        "pediatrics"
+      ]
+    },
+    {
+      "id": "sleep_circadian_dysregulation",
+      "label": "Sleep Schedule / Circadian Challenges",
+      "synonyms": [
+        "late bedtime",
+        "irregular schedule"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "difficulty_falling_asleep",
+        "variable_bedtimes",
+        "early_morning_waking"
+      ],
+      "contradictors": [
+        "stable schedule with easy sleep onset"
+      ],
+      "first_line_tests": [
+        "Sleep diary (1\u20132 weeks)"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "sleep_medicine"
+      ]
+    },
+    {
+      "id": "periodic_limb_movement_restless_sleep",
+      "label": "Restless Sleep / Periodic Limb Movements Consideration",
+      "synonyms": [
+        "PLMD consideration"
+      ],
+      "age_bands": [
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "limb_kicking",
+        "restless_sleep",
+        "daytime_fatigue"
+      ],
+      "contradictors": [
+        "calm_sleep without limb movements"
+      ],
+      "first_line_tests": [
+        "Discuss ferritin",
+        "Sleep study (if indicated)"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "sleep_medicine"
+      ]
+    },
+    {
+      "id": "allergic_rhinitis_atopy",
+      "label": "Allergic Rhinitis / Atopy Consideration",
+      "synonyms": [
+        "seasonal allergies",
+        "perennial allergies"
+      ],
+      "age_bands": [
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "nasal_congestion",
+        "sneezing",
+        "itchy_eyes",
+        "mouth_breathing"
+      ],
+      "contradictors": [
+        "no allergy symptoms across seasons"
+      ],
+      "first_line_tests": [
+        "Clinical history; allergy testing per clinician"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "allergy_immunology"
+      ]
+    },
+    {
+      "id": "eczema_dermatitis_discomfort",
+      "label": "Eczema / Dermatitis Discomfort Consideration",
+      "synonyms": [
+        "atopic dermatitis"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "itching",
+        "sleep_fragmentation",
+        "skin_rash"
+      ],
+      "contradictors": [
+        "no itching or skin findings"
+      ],
+      "first_line_tests": [
+        "Clinical evaluation"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "dermatology"
+      ]
+    },
+    {
+      "id": "environmental_pollutant_exposure",
+      "label": "Environmental Smoke/Pollutant Exposure Consideration",
+      "synonyms": [
+        "secondhand smoke",
+        "poor indoor air quality"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "chronic_cough",
+        "nasal_congestion",
+        "wheezing_history"
+      ],
+      "contradictors": [
+        "no exposure reported"
+      ],
+      "first_line_tests": [
+        "Environmental history"
+      ],
+      "specialist_types": [
+        "pediatrics"
+      ]
+    },
+    {
+      "id": "dental_caries_or_pain",
+      "label": "Dental Pain/Tooth Decay Consideration",
+      "synonyms": [
+        "cavities",
+        "dental caries"
+      ],
+      "age_bands": [
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "mouth_pain",
+        "avoidance_of_chewy_foods",
+        "night_waking"
+      ],
+      "contradictors": [
+        "recent normal dental exam"
+      ],
+      "first_line_tests": [
+        "Dental exam"
+      ],
+      "specialist_types": [
+        "dentistry",
+        "pediatrics"
+      ]
+    },
+    {
+      "id": "oral_motor_sensory_feeding",
+      "label": "Oral-Motor / Sensory Feeding Challenges",
+      "synonyms": [
+        "feeding therapy consideration",
+        "texture aversion"
+      ],
+      "age_bands": [
+        "0-2",
+        "3-5",
+        "6-12"
+      ],
+      "typical_signals": [
+        "strong_texture_aversion",
+        "limited_variety",
+        "gagging"
+      ],
+      "contradictors": [
+        "broad_diet_without_difficulty"
+      ],
+      "first_line_tests": [
+        "Feeding/SLP or OT evaluation"
+      ],
+      "specialist_types": [
+        "speech_language_pathology",
+        "occupational_therapy",
+        "pediatrics"
+      ]
+    },
+    {
+      "id": "dehydration_low_fiber",
+      "label": "Low Fluid/Fiber Intake Consideration",
+      "synonyms": [
+        "low hydration"
+      ],
+      "age_bands": [
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "hard_stools",
+        "infrequent_bm"
+      ],
+      "contradictors": [
+        "adequate fluids and fiber by history"
+      ],
+      "first_line_tests": [
+        "Dietary/fluids history"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "gastroenterology"
+      ]
+    },
+    {
+      "id": "post_infectious_neuroimmune_consideration",
+      "label": "Post-Infectious Neuroimmune Consideration",
+      "synonyms": [
+        "PANS/PANDAS consideration"
+      ],
+      "age_bands": [
+        "3-5",
+        "6-12",
+        "13+"
+      ],
+      "typical_signals": [
+        "sudden_behavior_change",
+        "tics_or_obsessions",
+        "recent_infection_history"
+      ],
+      "contradictors": [
+        "no acute onset or infection link"
+      ],
+      "first_line_tests": [
+        "Clinical history; ASO/anti-DNase B per clinician"
+      ],
+      "specialist_types": [
+        "pediatrics",
+        "neurology",
+        "psychiatry"
+      ]
+    }
+  ]
+}
