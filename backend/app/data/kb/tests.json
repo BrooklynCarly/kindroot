@@ -1,0 +1,36 @@
+{
+  "title": "Diagnostic Tests and Products",
+  "description": "Knowledge base of diagnostic tests and products for autism-related biomarkers, gut health, genomics, and metabolic health",
+  "version": "1.0.0",
+  "last_updated": "2025-11-03",
+  "tests": [
+    {
+      "name": "tinyhealth baby gut health test",
+      "purpose": "Microbiome test measuring biomarkers associated with eczema, allergies, asthma, metabolic health, sleep, constipation and more",
+      "link": "https://www.tinyhealth.com/store/baby-gut-health-test",
+      "description": "At-home microbiome test with health coaching sessions for kids ages 3 to 18 years",
+      "price": null
+    },
+    {
+      "name": "tinyhealth child gut health test",
+      "purpose": "Microbiome test measuring biomarkers associated with eczema, allergies, asthma, metabolic health, sleep, constipation and more",
+      "link": "https://www.tinyhealth.com/store/child-gut-health-test",
+      "description": "At-home microbiome test with health coaching sessions for babies under 3 years of age",
+      "price": null
+    },
+    {
+      "name": "Intellxx DNA test",
+      "purpose": "Precision genomics helps pinpoint root-cause SNPs and treatment paths—guided by a genomics expert",
+      "link": "https://intellxxdna.com/",
+      "description": "At-home DNA swab kit and custom report focused on pinpointing root causes and identifying treatment paths based on precision genomics",
+      "price": null
+    },
+    {
+      "name": "FRAT now",
+      "purpose": "Detect autoantibodies and identify folate transport issues",
+      "link": "https://www.fratnow.com/",
+      "description": "Blood test that detects autoantibodies against the folate receptor alpha, which can interfere with folate transport into the brain; results can guide treatment (e.g., alternative folate forms)",
+      "price": null
+    }
+  ]
+}
