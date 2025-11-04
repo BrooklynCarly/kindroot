@@ -96,21 +96,20 @@ LEAD_INVESTIGATOR_PROMPT = """You are the Lead Investigator in a functional medi
     Your task is to generate hypotheses about the most likely underlying biomedical contributors to the child’s symptoms.
     Rules:
     - First, review safety flags (do not ignore urgent items).
-    Then, map the child’s highest-scoring symptom clusters to their possible root causes.
-    Look for crossovers: root causes that appear across multiple symptom domains (e.g., “seizures” contributing to speech delay, sleep problems, irritability).
-    Rank hypotheses by:
-    Strength of evidence (number of symptom clusters pointing to it).
-    Severity/risk (e.g., seizures, regression, nutritional deficiencies).
-    Modifiability (can be tested/intervened).
-    For each hypothesis, include:
-    Label: concise name (e.g., “Cerebral Folate Deficiency”).
-    Supporting evidence: which sections and questions suggest this.
-    Counterevidence: data that argues against it.
-    Priority level: High / Medium / Low.
-    Suggested next step: labs or referrals (to confirm or refute)
-    Suggested daily life modifications or lightweight interventions.
-    Provide at least 2 hypotheses, and up to 5. Be sure to emphasize the most obvious if there is one. Do not generate any hyptotheses without good data.
-    Do not diagnose; only generate hypotheses for clinician consideration."""
+    - Map the child’s highest-scoring symptom clusters to plausible root causes; look for crossovers.
+    - Rank by:
+    + Strength of evidence (number of symptom clusters pointing to it).
+    + Severity/risk (e.g., seizures, regression, nutritional deficiencies).
+    + Modifiability (can be tested/intervened).
+    Output requirements (strict):
++    - Return EXACTLY 3 hypotheses (most useful for parent–clinician conversation). Do NOT diagnose and do NOT give medical advice or dosing.
++    - For each hypothesis return JSON fields:
++      * name (short label)
++      * rationale (why this fits; cite symptom clusters/signals)
++      * confidence (low|moderate|high, optional)
++      * talking_points (2–5 bullets parents can use with their pediatrician)
++      * recommended_tests (0–3) with: name, category, order_type = discuss_with_pediatrician|self_purchase|either, is_at_home (bool?), notes, purchase_url?
++    - Keep language parent-friendly (no jargon), emphasize “for discussion” and “to help decide next steps,” never as a diagnosis."""
 
 RESOURCE_GENERATION_PROMPT = """You are an assistant that uses the provided web-search tool. You do not provide medical advice or diagnoses. Your output is strictly informational and must be verifiable via cited official sources. Do not collect or output user PII. Do not contact providers. Exclude sponsored results and paywalled directories. Prefer .gov or official state domains for Part C programs.
 
@@ -148,13 +147,19 @@ Given a patient ZIP code, identify the state Early Intervention (Part C) program
 - **Decision**: `metropolitan === true` -> `radius_miles = 3`, `metropolitan === false` -> `radius_miles = 20`.
 - **Output**: `radius_miles` (number)
 
-**Step 4: Behavioral/ABA Search**
+**Step 4: Developmental Pediatrics**
+- **Goal**: Identify nearby pediatricians (preferably with developmental pediatrics or autism experience).
+- **Search Queries**: `developmental pediatrician [CITY] [STATE]`, `pediatrician autism [ZIP]`
+- **Filtering**: Ratings ≥ 4.2, Reviews ≥ 3, within radius, pediatric focus; list up to 5.
+- **Output**: `pediatricians` (array of `Provider` objects)
+
+**Step 5: Behavioral/ABA Search**
 - **Goal**: Find Behavioral/ABA therapy providers within the radius, using Google business results.
 - **Search Queries**: `ABA therapy [CITY] [STATE]`, `behavioral therapist autism [ZIP]`
 - **Filtering**: Ratings >= 4.2, Reviews >= 3, max 5 results, within radius, autism/developmental specialty.
 - **Output**: `behavioral_providers` (array of `Provider` objects)
 
-**Step 5: Speech Search**
+**Step 6: Speech Search**
 - **Goal**: Find Speech therapy providers within the radius, using Google business results.
 - **Search Queries**: `speech therapist [CITY] [STATE]`, `speech language pathologist [ZIP]`
 - **Filtering**: Ratings >= 4.2, Reviews >= 3, max 5 results, within radius, pediatric/developmental focus.
@@ -171,13 +176,25 @@ Return ONLY a single valid JSON object matching the `SummaryReport` schema. Do n
       "city": "string",
       "state": "string"
     },
-    "metropolitan_status": "Yes|No",
-    "search_radius_miles": 3,
+
     "state_early_intervention_program": {
       "website": "string",
       "contact_phone": "string|null",
       "contact_email": "string|null"
     },
+    
+    "pediatricians": [
+      {
+        "name": "string",
+        "rating": 4.8,
+        "review_count": 25,
+        "distance_miles": 1.2,
+        "address": "string",
+        "phone": "string|null",
+        "website": "string|null",
+        "specialties": ["string"],
+      }
+    ],
     "behavioral_providers": [
       {
         "name": "string",
@@ -190,7 +207,18 @@ Return ONLY a single valid JSON object matching the `SummaryReport` schema. Do n
         "specialties": ["string"],
       }
     ],
-    "speech_providers": [],
+    "speech_providers": [
+      {
+        "name": "string",
+        "rating": 4.8,
+        "review_count": 25,
+        "distance_miles": 1.2,
+        "address": "string",
+        "phone": "string|null",
+        "website": "string|null",
+        "specialties": ["string"],
+      }
+    ],
     "additional_notes": ["string"]
   }
 }
@@ -282,33 +310,55 @@ class InvestigatorHypothesis(BaseModel):
     name: str
     rationale: str
     confidence: Optional[str] = None
-
+    talking_points: List[str] = []
+    class TestItem(BaseModel):
+        name: str
+        category: Optional[str] = None          # e.g., "blood", "stool", "imaging"
+        order_type: Literal["discuss_with_pediatrician","self_purchase","either"] = "discuss_with_pediatrician"
+        is_at_home: Optional[bool] = None
+        notes: Optional[str] = None
+        purchase_url: Optional[str] = None
+    recommended_tests: List[TestItem] = []
 class InvestigatorOutput(BaseModel):
     hypotheses: List[InvestigatorHypothesis]
-    uncertainties: List[str]
+    # uncertainties: List[str]
     next_steps: List[str]
     meta: Dict[str, Any]
     model_config = {
         "json_schema_extra": {
             "examples": [
                 # Rich example with two hypotheses
-                {
+                    {
                     "hypotheses": [
                         {
                             "name": "Obstructive Sleep Apnea (OSA)",
                             "rationale": "Frequent night waking and snoring; sleep fragmentation can drive daytime dysregulation.",
-                            "confidence": "moderate"
+                            "confidence": "moderate",
+                            "talking_points": [
+                                "Describe sleep patterns and snoring to your pediatrician.",
+                                "Ask whether ENT evaluation is appropriate."
+                            ],
+                            "recommended_tests": [
+                                {"name": "Pediatric sleep study (polysomnography)", "category":"sleep", "order_type":"discuss_with_pediatrician", "notes":"Confirms OSA severity"}
+                            ]
                         },
                         {
                             "name": "Iron Deficiency",
                             "rationale": "History of anemia and sleep issues; iron deficiency can worsen sleep quality and attention.",
-                            "confidence": "low"
+                            "confidence": "low",
+                            "talking_points": [
+                                "Describe sleep patterns and snoring to your pediatrician.",
+                                "Ask whether ENT evaluation is appropriate."
+                            ],
+                            "recommended_tests": [
+                                {"name": "Pediatric sleep study (polysomnography)", "category":"sleep", "order_type":"discuss_with_pediatrician", "notes":"Confirms OSA severity"}
+                            ]
                         }
                     ],
-                    "uncertainties": [
-                        "Are there witnessed pauses in breathing or gasping at night?",
-                        "Recent ferritin and CBC values are unavailable."
-                    ],
+                    # "uncertainties": [
+                    #     "Are there witnessed pauses in breathing or gasping at night?",
+                    #     "Recent ferritin and CBC values are unavailable."
+                    # ],
                     "next_steps": [
                         "Discuss a pediatric sleep evaluation; consider ENT review for tonsils/adenoids.",
                         "Order labs: CBC, ferritin, iron studies, CRP.",
@@ -323,12 +373,11 @@ class InvestigatorOutput(BaseModel):
                 # Minimal valid example
                 {
                     "hypotheses": [],
-                    "uncertainties": [],
                     "next_steps": [],
                     "meta": {"version": "1.0.0"}
                 }
-            ]
-        }
+                        ]
+                    }
     }
 
 # Resource Generation Models
@@ -357,6 +406,7 @@ class SummaryReport(BaseModel):
     metropolitan_status: Literal["Yes", "No"]
     search_radius_miles: int
     state_early_intervention_program: StateEIRProgram
+    pediatricians: Optional[List[Provider]] = None
     behavioral_providers: List[Provider]
     speech_providers: List[Provider]
     additional_notes: Optional[List[str]] = None
