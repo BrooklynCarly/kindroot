@@ -234,13 +234,13 @@ class GoogleDocsService:
             index += len(full_text)
         
         # Add disclaimer block at the top
-        add_paragraph("Welcome to KindRoot, we're glad you found us. We're hoping this is your start to feeling supported along the evolving journey of helping your kiddo experience their best self possible.")
+        add_paragraph("We are parents helping parents navigate the tough conversations.")
         
         add_paragraph("What this is—and isn't", "HEADING_2")
-        add_paragraph("This report shares general information to help parents and caregivers learn about autism spectrum disorder (ASD) and find resources. It is not medical advice, a diagnosis, or a treatment plan.")
+        add_paragraph("This report shares information and resources to discuss with your healthcare provider. It is not medical advice, a diagnosis, or a treatment plan.")
         
         add_paragraph("What to know", "HEADING_2")
-        add_paragraph("Every child with ASD is unique. What helps one child may not fit another.")
+        add_paragraph("Your kiddo is unique. What helps one child may not fit another.")
         add_paragraph("")  # Empty line for spacing
         add_paragraph("You'll see ideas from reputable clinical sources and from families who've been there. Use these insights to prepare for conversations with your child's clinician.")
         add_paragraph("")  # Empty line for spacing
@@ -275,51 +275,68 @@ class GoogleDocsService:
         add_paragraph(f"Diagnosis Status: {diagnosis}")
         add_paragraph("")
         
-        # Triage Results Section (supports both legacy and new schemas)
-        triage_title = triage_result.get('summary_title') or "Safety & Triage Summary"
-        add_paragraph(triage_title, "HEADING_1")
-        triage_message = triage_result.get('message')
-        if triage_message:
-            add_paragraph(triage_message)
-            add_paragraph("")
+        # # Triage Results Section (supports both legacy and new schemas)
+        # triage_title = triage_result.get('summary_title') or "Safety & Triage Summary"
+        # add_paragraph(triage_title, "HEADING_1")
+        # triage_message = triage_result.get('message')
+        # if triage_message:
+        #     add_paragraph(triage_message)
+        #     add_paragraph("")
         
-        urgent_items = triage_result.get('urgent_items', []) or []
-        if urgent_items:
-            add_paragraph("Urgent Items:", "HEADING_2")
-            for i, item in enumerate(urgent_items, 1):
-                add_paragraph(f"{i}. {item.get('category', item.get('title', 'Unknown Category'))}", "HEADING_3")
-                add_paragraph(f"Severity: {item.get('severity', item.get('level', 'N/A'))}")
-                add_paragraph(f"Evidence: {item.get('evidence', item.get('details', 'N/A'))}")
-                add_paragraph(f"Why It Matters: {item.get('why_it_matters', item.get('why', 'N/A'))}")
-                add_paragraph(f"Next Step: {item.get('next_step', item.get('action', 'N/A'))}")
-                add_paragraph("")
+        # urgent_items = triage_result.get('urgent_items', []) or []
+        # if urgent_items:
+        #     add_paragraph("Urgent Items:", "HEADING_2")
+        #     for i, item in enumerate(urgent_items, 1):
+        #         add_paragraph(f"{i}. {item.get('category', item.get('title', 'Unknown Category'))}", "HEADING_3")
+        #         add_paragraph(f"Severity: {item.get('severity', item.get('level', 'N/A'))}")
+        #         add_paragraph(f"Evidence: {item.get('evidence', item.get('details', 'N/A'))}")
+        #         add_paragraph(f"Why It Matters: {item.get('why_it_matters', item.get('why', 'N/A'))}")
+        #         add_paragraph(f"Next Step: {item.get('next_step', item.get('action', 'N/A'))}")
+        #         add_paragraph("")
         
-        # Moderate items (new schema)
-        moderate_items = triage_result.get('moderate_items', []) or []
-        if moderate_items:
-            add_paragraph("Moderate Items:", "HEADING_2")
-            for i, item in enumerate(moderate_items, 1):
-                add_paragraph(f"{i}. {item.get('category', item.get('title', 'Unknown Category'))}", "HEADING_3")
-                add_paragraph(f"Severity: {item.get('severity', item.get('level', 'N/A'))}")
-                add_paragraph(f"Evidence: {item.get('evidence', item.get('details', 'N/A'))}")
-                add_paragraph(f"Why It Matters: {item.get('why_it_matters', item.get('why', 'N/A'))}")
-                add_paragraph(f"Next Step: {item.get('next_step', item.get('action', 'N/A'))}")
-                add_paragraph("")
+        # # Moderate items (new schema)
+        # moderate_items = triage_result.get('moderate_items', []) or []
+        # if moderate_items:
+        #     add_paragraph("Moderate Items:", "HEADING_2")
+        #     for i, item in enumerate(moderate_items, 1):
+        #         add_paragraph(f"{i}. {item.get('category', item.get('title', 'Unknown Category'))}", "HEADING_3")
+        #         add_paragraph(f"Severity: {item.get('severity', item.get('level', 'N/A'))}")
+        #         add_paragraph(f"Evidence: {item.get('evidence', item.get('details', 'N/A'))}")
+        #         add_paragraph(f"Why It Matters: {item.get('why_it_matters', item.get('why', 'N/A'))}")
+        #         add_paragraph(f"Next Step: {item.get('next_step', item.get('action', 'N/A'))}")
+        #         add_paragraph("")
         
         # Hypotheses Section
-        add_paragraph("Clinical Hypotheses", "HEADING_1")
+        # Top 3 Potential Root Causes (parent-friendly)
+        add_paragraph("Top 3 Potential Root Causes", "HEADING_1")
         hypotheses_list = hypotheses.get('hypotheses', [])
         if hypotheses_list:
-            for i, hyp in enumerate(hypotheses_list, 1):
+            for i, hyp in enumerate(hypotheses_list[:3], 1):
                 # Support both schemas: name/rationale and hypothesis/supporting_evidence
                 title = hyp.get('name') or hyp.get('hypothesis') or 'Unknown'
                 add_paragraph(f"{i}. {title}", "HEADING_3")
-                add_paragraph(f"Confidence: {hyp.get('confidence', 'N/A')}")
                 rationale = hyp.get('rationale') or hyp.get('supporting_evidence') or 'N/A'
-                add_paragraph(f"Rationale / Evidence: {rationale}")
+                add_paragraph(f"Why this might fit (evidence): {rationale}")
+                tp = hyp.get('talking_points', []) or []
+                if tp:
+                    add_paragraph("Talking points for your pediatrician", "HEADING_4")
+                    for b in tp:
+                        add_paragraph(f"• {b}")
+                tests = hyp.get('recommended_tests', []) or []
+                if tests:
+                    add_paragraph("Recommended tests to discuss or consider", "HEADING_4")
+                    for t in tests:
+                        line = f"• {t.get('name','Test')}"
+                        if t.get('category'): line += f" — {t['category']}"
+                        if t.get('order_type') == 'self_purchase': line += " (at-home or self-purchase)"
+                        elif t.get('order_type') == 'either': line += " (order via clinician or self-purchase)"
+                        if t.get('notes'): line += f" — {t['notes']}"
+                        add_paragraph(line)
+                        if t.get('purchase_url'):
+                            add_link("Link", t['purchase_url'])
                 add_paragraph("")
         else:
-            add_paragraph("No hypotheses available")
+            add_paragraph("No root causes available")
             add_paragraph("")
         
         # Next steps and uncertainties are at the top level, not per hypothesis
@@ -354,7 +371,7 @@ class GoogleDocsService:
                 location = summary_report.get('patient_location', {})
                 if location:
                     add_paragraph(f"Location: {location.get('city', 'N/A')}, {location.get('state', 'N/A')} {location.get('zip_code', 'N/A')}")
-                    add_paragraph(f"Metropolitan Area: {summary_report.get('metropolitan_status', 'N/A')}")
+                    # add_paragraph(f"Metropolitan Area: {summary_report.get('metropolitan_status', 'N/A')}")
                     add_paragraph(f"Search Radius: {summary_report.get('search_radius_miles', 'N/A')} miles")
                     add_paragraph("")
                 
@@ -370,7 +387,27 @@ class GoogleDocsService:
                     if ei_program.get('contact_email'):
                         add_paragraph(f"Email: {ei_program.get('contact_email')}")
                     add_paragraph("")
-                
+                # Pediatricians / Developmental Pediatrics
+                peds = summary_report.get('pediatricians', [])
+                if peds:
+                    add_paragraph("Pediatricians / Developmental Pediatrics", "HEADING_2")
+                    for i, provider in enumerate(peds, 1):
+                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_3")
+                        rating = provider.get('rating'); reviews = provider.get('review_count')
+                        if rating is not None:
+                            txt = f"Rating: {rating:.1f}/5.0"
+                            if reviews: txt += f" ({reviews} reviews)"
+                            add_paragraph(txt)
+                        if provider.get('distance_miles') is not None:
+                            add_paragraph(f"Distance: {provider['distance_miles']:.1f} miles")
+                        add_paragraph(f"Address: {provider.get('address','N/A')}")
+                        if provider.get('phone'): add_paragraph(f"Phone: {provider['phone']}")
+                        if provider.get('website'): add_link("Website", provider['website'])
+                        if provider.get('specialties'):
+                            add_paragraph("Specialties: " + ', '.join(provider['specialties']))
+                        add_paragraph("")
+                    add_paragraph("")
+
                 # Behavioral Providers
                 behavioral_providers = summary_report.get('behavioral_providers', [])
                 if behavioral_providers:
@@ -441,6 +478,13 @@ class GoogleDocsService:
                             add_paragraph(f"Specialties: {specialties}")
                         add_paragraph("")
                 
+                # If undiagnosed, add “Where to obtain an evaluation”
+                diag_status = (patient_info.get('diagnosis_status') or "").strip().lower()
+                if diag_status in ("", "undiagnosed", "unknown", "none"):
+                    add_paragraph("Where to Obtain a Diagnostic Evaluation", "HEADING_1")
+                    add_paragraph("If you do not yet have an evaluation, here is a place to get started:")
+                    add_link("ADG Cares", "https://www.adgcares.com/")
+
                 # Additional Notes
                 notes = summary_report.get('additional_notes', [])
                 if notes:
