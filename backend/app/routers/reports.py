@@ -25,13 +25,14 @@ if str(PROJECT_ROOT) not in sys.path:
 from app.services.google_sheets import GoogleSheetsService
 from app.services.google_docs import GoogleDocsService
 from app.services.triage_transform import build_patient_report
-from app.services.knowledge_base import load_all_kb_items
+from app.services.knowledge_base import load_all_kb_items, get_interventions_for_matching
 from agents.autogen.agents import (
     OpenAIChat,
     TriageService,
     PatientParseService,
     LeadInvestigatorService,
     ResourceGenerationService,
+    ActionableStepsService,
 )
 
 logger = logging.getLogger(__name__)
@@ -146,6 +147,17 @@ def generate_patient_report(
         sheets_service.write_to_sheet(f"{sheet_name}!{hypotheses_cell}", [[hypotheses_str]])
         logger.info(f"Hypotheses written to {hypotheses_cell}")
         
+        # Generate actionable steps (always fresh)
+        logger.info("Generating actionable steps...")
+        interventions_kb = get_interventions_for_matching()
+        actionable_steps_svc = ActionableStepsService(llm=llm, model="gpt-4o-mini")
+        actionable_steps_obj = actionable_steps_svc.run(
+            hypotheses=hypotheses_obj,
+            interventions_kb=interventions_kb
+        )
+        actionable_steps = actionable_steps_obj.model_dump()
+        logger.info(f"Generated {len(actionable_steps.get('recommended_approaches', []))} actionable approaches")
+        
         # Generate resources
         logger.info("Generating resources...")
         resource_svc = ResourceGenerationService(llm=llm)
@@ -185,6 +197,7 @@ def generate_patient_report(
                 patient_info=patient_info_dict,
                 triage_result=triage_report,
                 hypotheses=hypotheses,
+                actionable_steps=actionable_steps,
                 resources=resources,
                 folder_id=GOOGLE_DRIVE_FOLDER_ID
             )

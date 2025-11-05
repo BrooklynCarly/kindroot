@@ -81,6 +81,7 @@ class GoogleDocsService:
         patient_info: Dict[str, Any],
         triage_result: Dict[str, Any],
         hypotheses: Dict[str, Any],
+        actionable_steps: Dict[str, Any],
         resources: Dict[str, Any],
         folder_id: str = None
     ) -> str:
@@ -91,6 +92,7 @@ class GoogleDocsService:
             patient_info: Patient information dictionary
             triage_result: Triage analysis results
             hypotheses: Lead investigator hypotheses
+            actionable_steps: Actionable intervention approaches
             resources: Local autism resources
             folder_id: Optional Google Drive folder ID to create the doc in
             
@@ -122,13 +124,20 @@ class GoogleDocsService:
             doc_id = file.get('id')
             
             # Build the content requests
-            requests = self._build_report_content(patient_info, triage_result, hypotheses, resources)
+            main_requests, toc_requests = self._build_report_content(patient_info, triage_result, hypotheses, actionable_steps, resources)
             
-            # Update the document with content
+            # Update the document with main content first
             self.docs_service.documents().batchUpdate(
                 documentId=doc_id,
-                body={'requests': requests}
+                body={'requests': main_requests}
             ).execute()
+            
+            # Then update with TOC (bookmarks and links) in a second batch
+            if toc_requests:
+                self.docs_service.documents().batchUpdate(
+                    documentId=doc_id,
+                    body={'requests': toc_requests}
+                ).execute()
             
             # Make the document accessible (anyone with link can view)
             self.drive_service.permissions().create(
@@ -153,21 +162,34 @@ class GoogleDocsService:
         patient_info: Dict[str, Any],
         triage_result: Dict[str, Any],
         hypotheses: Dict[str, Any],
+        actionable_steps: Dict[str, Any],
         resources: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    ) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """
         Build the batch update requests for document content.
         
         Returns:
-            List of batch update requests
+            Tuple of (main_requests, toc_requests) - TOC requests must be applied after main content
         """
         requests = []
         index = 1  # Start after the title
+        heading2_sections = []  # Track HEADING_2 sections for TOC
         
         # Helper to add text with optional styling
-        def add_paragraph(text: str, style: str = "NORMAL_TEXT", index_offset: int = 0):
+        def add_paragraph(text: str, style: str = "NORMAL_TEXT", index_offset: int = 0, page_break_before: bool = False):
             nonlocal index
             insert_index = index + index_offset
+            
+            # Add page break before if requested
+            if page_break_before:
+                requests.append({
+                    'insertPageBreak': {
+                        'location': {'index': insert_index}
+                    }
+                })
+                index += 1
+                insert_index = index + index_offset
+            
             requests.append({
                 'insertText': {
                     'location': {'index': insert_index},
@@ -188,6 +210,14 @@ class GoogleDocsService:
                         'fields': 'namedStyleType'
                     }
                 })
+                
+                # Track HEADING_2 sections for TOC
+                if style == "HEADING_2":
+                    heading2_sections.append({
+                        'text': text,
+                        'index': insert_index
+                    })
+            
             index += len(text) + 1
         
         # Helper to add text with a clickable hyperlink
@@ -235,13 +265,14 @@ class GoogleDocsService:
         
         # Add disclaimer block at the top
         add_paragraph("We are parents helping parents navigate tough conversations.")
-        
+        add_paragraph("")
         add_paragraph("What this is—and isn't: This report shares information and resources to discuss with your healthcare provider. It is not medical advice, a diagnosis, or a treatment plan.")
-        
+        add_paragraph("")
         add_paragraph("What to know: Your kiddo is unique. What helps one child may not fit another, but we aim to find information from families with kids similar to yours. You'll see ideas from reputable clinical sources and from families who've been there. Use these insights to prepare for conversations with your child's clinician.")
+        add_paragraph("")
         
         # Demographic Information Section
-        add_paragraph("Your Information", "HEADING_2")
+        add_paragraph("Your Information", "HEADING_2", page_break_before=True)
         
         # Parent/contact info from sheet
         date_submitted = patient_info.get('date_submitted')
@@ -259,7 +290,7 @@ class GoogleDocsService:
         zipcode = patient_info.get('zipcode')
         if zipcode:
             add_paragraph(f"Zipcode: {zipcode}")
-        
+        add_paragraph("")
         # Use correct field names from PatientParse model
         age = patient_info.get('patient_age') or patient_info.get('age', 'N/A')
         sex = patient_info.get('patient_sex') or patient_info.get('gender', 'N/A')
@@ -268,7 +299,14 @@ class GoogleDocsService:
         add_paragraph(f"Child's Age: {age}")
         add_paragraph(f"Sex: {sex}")
         add_paragraph(f"Diagnosis Status: {diagnosis}")
-        add_paragraph("")
+        
+        # Top Family Priorities
+        top_priorities = patient_info.get('top_family_priorities')
+        if top_priorities and isinstance(top_priorities, list) and len(top_priorities) > 0:
+            add_paragraph("")
+            add_paragraph("Top Family Priorities:")
+            for priority in top_priorities:
+                add_paragraph(f"• {priority}")
         
         # # Triage Results Section (supports both legacy and new schemas)
         # triage_title = triage_result.get('summary_title') or "Safety & Triage Summary"
@@ -303,7 +341,7 @@ class GoogleDocsService:
         
         # Hypotheses Section
         # Top 3 Potential Root Causes (parent-friendly)
-        add_paragraph("Top 3 Potential Root Causes", "HEADING_2")
+        add_paragraph("Top 3 Potential Root Causes", "HEADING_2", page_break_before=True)
         hypotheses_list = hypotheses.get('hypotheses', [])
         if hypotheses_list:
             for i, hyp in enumerate(hypotheses_list[:3], 1):
@@ -349,8 +387,90 @@ class GoogleDocsService:
                 add_paragraph(f"{i}. {step}")
             add_paragraph("")
         
+        # Actionable Steps Section
+        add_paragraph("What Others Have Tried", "HEADING_2", page_break_before=True)
+        add_paragraph("Based on the patterns identified above, here are approaches other families with similar situations have explored. This information is for discussion with your pediatrician—not medical advice. Always consult your care team before making changes.")
+        add_paragraph("")
+        
+        # Implementation guidance
+        impl_guidance = actionable_steps.get('implementation_guidance')
+        if impl_guidance:
+            add_paragraph("Getting Started", "HEADING_3")
+            add_paragraph(impl_guidance)
+            add_paragraph("")
+        
+        # Recommended approaches
+        approaches = actionable_steps.get('recommended_approaches', [])
+        if approaches:
+            add_paragraph("Recommended Approaches", "HEADING_3")
+            for i, intervention in enumerate(approaches, 1):
+                # Intervention name and category
+                add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
+                add_paragraph(f"Category: {intervention.get('category', 'N/A')}")
+                add_paragraph("")
+                
+                # Why this may help
+                why_help = intervention.get('why_this_may_help')
+                if why_help:
+                    add_paragraph(f"Why this may help: {why_help}")
+                    add_paragraph("")
+                
+                # Addresses multiple concerns
+                concerns = intervention.get('addresses_multiple_concerns', [])
+                if concerns:
+                    add_paragraph("May help with:")
+                    for concern in concerns:
+                        add_paragraph(f"• {concern}")
+                    add_paragraph("")
+                
+                # What others have done
+                what_done = intervention.get('what_others_have_done', [])
+                if what_done:
+                    add_paragraph("What others have done:")
+                    for example in what_done:
+                        add_paragraph(f"• {example}")
+                    add_paragraph("")
+                
+                # What families tracked
+                tracked = intervention.get('what_families_tracked', [])
+                if tracked:
+                    add_paragraph("What families tracked:")
+                    for metric in tracked:
+                        add_paragraph(f"• {metric}")
+                    add_paragraph("")
+                
+                # Common decision points
+                decision_points = intervention.get('common_decision_points', [])
+                if decision_points:
+                    add_paragraph("Common decision points:")
+                    for point in decision_points:
+                        add_paragraph(f"• {point}")
+                    add_paragraph("")
+                
+                # Considerations
+                considerations = intervention.get('considerations', [])
+                if considerations:
+                    add_paragraph("Considerations:")
+                    for consideration in considerations:
+                        add_paragraph(f"• {consideration}")
+                    add_paragraph("")
+                
+                # Important notes
+                notes = intervention.get('important_notes')
+                if notes:
+                    add_paragraph(f"Important: {notes}")
+                    add_paragraph("")
+        
+        # General notes
+        general_notes = actionable_steps.get('general_notes', [])
+        if general_notes:
+            add_paragraph("Important Reminders", "HEADING_3")
+            for note in general_notes:
+                add_paragraph(f"• {note}")
+            add_paragraph("")
+        
         # Resources Section
-        add_paragraph("Local Resources", "HEADING_2")
+        add_paragraph("Local Resources", "HEADING_2", page_break_before=True)
         
         # Check if resources generation was skipped
         if resources.get('status') == 'skipped':
@@ -486,4 +606,5 @@ class GoogleDocsService:
             else:
                 add_paragraph("No resources available for this location")
         
-        return requests
+        # Return main requests only (TOC disabled for now due to API limitations)
+        return requests, []

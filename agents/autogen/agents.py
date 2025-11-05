@@ -81,11 +81,12 @@ TRIAGE_SYSTEM_PROMPT = """You are the Safety & Triage Checker for a pediatric au
     "Treat “Sometimes” as MODERATE, HIGH if combined with concerning open-text phrases.\n"
     "When in doubt, classify HIGH and state why."""
 PATIENT_PARSE_SYSTEM_PROMPT = """You are a clinical data extraction assistant. Your task is to read a short, possibly inconsistent free-text snippet and extract: "
-    "Patient Age (integer, years), Patient Sex (normalized to 'male', 'female', 'non-binary', or 'other' when possible), and Diagnosis Status (status, level).\n\n"
+    "Patient Age (integer, years), Patient Sex (normalized to 'male', 'female', 'non-binary', or 'other' when possible), Diagnosis Status (status, level), and Top Family Priorities.\n\n"
     "Rules:\n"
     "- When age is unclear, return null. If present, choose a reasonable integer in 0..130.\n"
     "- Normalize sex/gender: m, man -> male; f, woman -> female; nb/nonbinary -> non-binary; otherwise keep short original or 'other'.\n"
     "- Diagnosis Status should share if there is a diagnosis ('Diagnosed, Level X' or 'Undiagnosed'). If not present, return null.\n"
+    "- Top Family Priorities: Extract the answer to the question 'which three problems feel the hardest for your child and family right now?' as an array of strings (up to 3 items). If not present, return 'not answered'.\n"
     "- Output valid JSON only (no extra text) matching the schema exactly."""
 LEAD_INVESTIGATOR_PROMPT = """You are the Lead Investigator in a functional medicine autism care team.
     You receive:
@@ -110,6 +111,66 @@ LEAD_INVESTIGATOR_PROMPT = """You are the Lead Investigator in a functional medi
 +      * talking_points (2–5 bullets parents can use with their pediatrician)
 +      * recommended_tests (0–3) with: name, category, order_type = discuss_with_pediatrician|self_purchase|either, is_at_home (bool?), notes, purchase_url?
 +    - Keep language parent-friendly (no jargon), emphasize “for discussion” and “to help decide next steps,” never as a diagnosis."""
+
+
+ACTIONABLE_STEPS_PROMPT = """You are an intervention planning assistant. Your role is to:
+1. Review ALL hypotheses together as a complete picture
+2. Identify 2-3 interventions that address multiple root issues
+3. Recommend approaches that provide the most comprehensive benefit
+
+# INPUTS
+You will receive:
+- ALL hypotheses from the Lead Investigator (review as a whole)
+- Interventions Knowledge Base (approaches families have tried)
+
+# YOUR TASK
+Review the complete hypothesis picture and select 2-3 interventions that:
+- Address multiple hypotheses when possible (prioritize multi-system benefits)
+- Cover the most important concerns identified
+- Are practical for families to implement
+- Build on each other logically
+
+For each intervention:
+1. **WHY THIS MAY HELP**: Explain how it addresses the overall pattern (mention specific hypotheses)
+2. **ADDRESSES MULTIPLE CONCERNS**: List which hypothesis concerns it may help with
+3. **WHAT OTHERS HAVE DONE**: Examples from the KB's "how_to_try" field
+4. **WHAT FAMILIES TRACKED**: From the KB's "what_to_track" field
+5. **COMMON DECISION POINTS**: From the KB's "when_to_stop_or_escalate" field
+
+# MATCHING LOGIC
+- Look for interventions whose "who_it_may_help" matches symptoms across MULTIPLE hypotheses
+- Prioritize interventions that address foundational issues (gut health, sleep, nutrition)
+- Consider synergies: interventions that work well together
+- Select EXACTLY 2-3 interventions (no more, no less)
+- Order by: (1) Broadest impact, (2) Ease of implementation, (3) Safety profile
+
+# IMPLEMENTATION GUIDANCE
+Provide a brief narrative (2-3 sentences) on how to sequence these approaches:
+- What to start with first
+- What to layer in after 2-3 weeks
+- What to consider if initial approaches don't help
+
+# FRAMING GUIDELINES
+- Use observational language: "Some families have...", "Others found...", "Many parents report..."
+- Avoid prescriptive language: "You should...", "Try this...", "We recommend..."
+- Emphasize multi-system benefits when present
+- Frame as: "Based on the overall pattern, families have tried..."
+- Always include: "Discuss with your pediatrician before starting"
+
+# OUTPUT FORMAT
+Return JSON matching the ActionableStepsOutput schema.
+- Include EXACTLY 2-3 items in "recommended_approaches"
+- Order by priority/impact
+- Include implementation_guidance narrative
+- Include 2-4 general_notes
+
+# TONE
+- Informational and observational, not prescriptive
+- Parent-friendly, non-medical language
+- Emphasize holistic, multi-system thinking
+- Frame as "options to explore" not "what you must do"
+"""
+
 
 RESOURCE_GENERATION_PROMPT = """You are an assistant that uses the provided web-search tool. You do not provide medical advice or diagnoses. Your output is strictly informational and must be verifiable via cited official sources. Do not collect or output user PII. Do not contact providers. Exclude sponsored results and paywalled directories. Prefer .gov or official state domains for Part C programs.
 
@@ -281,6 +342,7 @@ class PatientParse(BaseModel):
     patient_age: Optional[int]
     patient_sex: Optional[str]
     diagnosis_status: Optional[str]
+    top_family_priorities: Optional[List[str]] = None  # Top 3 problems that feel hardest
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -288,19 +350,22 @@ class PatientParse(BaseModel):
                 {
                     "patient_age": 6,
                     "patient_sex": "male",
-                    "diagnosis_status": "Diagnosed, Level 2"
+                    "diagnosis_status": "Diagnosed, Level 2",
+                    "top_family_priorities": ["Sleep issues", "Meltdowns", "Picky eating"]
                 },
                 # Undiagnosed / ambiguous inputs
                 {
                     "patient_age": None,
                     "patient_sex": "other",
-                    "diagnosis_status": "Undiagnosed"
+                    "diagnosis_status": "Undiagnosed",
+                    "top_family_priorities": None
                 },
                 # Minimal shape (all unknown)
                 {
                     "patient_age": None,
                     "patient_sex": None,
-                    "diagnosis_status": None
+                    "diagnosis_status": None,
+                    "top_family_priorities": None
                 }
             ]
         }
@@ -378,6 +443,84 @@ class InvestigatorOutput(BaseModel):
                 }
                         ]
                     }
+    }
+
+# Actionable Steps Models
+class ActionableIntervention(BaseModel):
+    """Single intervention matched to the overall hypothesis picture"""
+    intervention_id: str
+    intervention_name: str
+    category: str  # e.g., "Diet", "Supplement", "Lifestyle"
+    
+    # Why this intervention (holistic view)
+    why_this_may_help: str  # How it addresses the overall pattern
+    addresses_multiple_concerns: List[str]  # Which hypothesis concerns it may help with
+    
+    # What others have done
+    what_others_have_done: List[str]
+    what_families_tracked: List[str]
+    common_decision_points: List[str]
+    
+    # Optional context
+    considerations: Optional[List[str]] = None
+    important_notes: Optional[str] = None
+
+class ActionableStepsOutput(BaseModel):
+    """Holistic intervention plan based on all hypotheses (2-3 interventions max)"""
+    recommended_approaches: List[ActionableIntervention] = Field(..., max_length=3)
+    implementation_guidance: str  # How to sequence/prioritize these approaches
+    general_notes: List[str]  # Overall observations and reminders
+    
+    meta: Dict[str, Any]
+    
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "recommended_approaches": [
+                        {
+                            "intervention_id": "diet_gfcf",
+                            "intervention_name": "Gluten/Casein-free baseline",
+                            "category": "Diet",
+                            "why_this_may_help": "Several concerns including GI issues and sleep disruption may be linked to food sensitivities. This addresses gut-brain axis dysfunction.",
+                            "addresses_multiple_concerns": [
+                                "GI symptoms (constipation, reflux)",
+                                "Sleep fragmentation",
+                                "Behavioral dysregulation"
+                            ],
+                            "what_others_have_done": [
+                                "Replaced breads/pastas with certified gluten-free alternatives",
+                                "Swapped dairy milk/yogurt with fortified non-dairy options"
+                            ],
+                            "what_families_tracked": [
+                                "Stool consistency and frequency",
+                                "Sleep quality and night wakings",
+                                "Daytime behavior and focus"
+                            ],
+                            "common_decision_points": [
+                                "No change after 3-4 weeks → consider additional GI workup",
+                                "Partial improvement → continue and layer in omega-3"
+                            ],
+                            "considerations": [
+                                "Certified gluten-free products",
+                                "Fortified alternative milks with calcium/vitamin D"
+                            ],
+                            "important_notes": "Consult with pediatrician before making dietary changes"
+                        }
+                    ],
+                    "implementation_guidance": "Many families start with dietary changes as foundational support. After 2-3 weeks, consider adding targeted supplements based on response.",
+                    "general_notes": [
+                        "Always discuss with your pediatrician before starting new interventions",
+                        "Introduce one change at a time when possible to track effects",
+                        "Results vary; what works for one family may not work for another"
+                    ],
+                    "meta": {
+                        "version": "1.0.0",
+                        "generated_at": "2025-11-05T18:00:00Z"
+                    }
+                }
+            ]
+        }
     }
 
 # Resource Generation Models
@@ -682,6 +825,75 @@ class ResourceGenerationService:
                 "message": error_msg,
                 "error_type": e.__class__.__name__
             }
+
+
+@dataclass
+class ActionableStepsService:
+    """Generate holistic intervention recommendations based on all hypotheses"""
+    llm: ChatLLM
+    model: str = "gpt-4o-mini"
+    
+    def run(
+        self,
+        hypotheses: InvestigatorOutput,
+        interventions_kb: List[Dict[str, Any]]
+    ) -> ActionableStepsOutput:
+        """
+        Generate holistic actionable steps from ALL hypotheses.
+        
+        Args:
+            hypotheses: Complete output from LeadInvestigatorService
+            interventions_kb: Interventions from knowledge base
+            
+        Returns:
+            Unified intervention plan addressing multiple concerns (2-3 interventions)
+        """
+        # Get example from model config
+        examples = ActionableStepsOutput.model_config.get("json_schema_extra", {}).get("examples", [])
+        example_str = json.dumps(examples[0], indent=2) if examples else ""
+        
+        schema_instruction = f"""Return ONLY valid JSON with this EXACT structure (no extra text, no markdown):
+
+EXAMPLE OUTPUT:
+{example_str}
+
+REQUIRED FIELDS:
+- recommended_approaches: array of intervention objects (2-3 items max)
+- implementation_guidance: string
+- general_notes: array of strings
+- meta: object with version and metadata"""
+        
+        # Include ALL hypotheses
+        hypotheses_text = json.dumps(hypotheses.model_dump(), indent=2)
+        
+        # Include full interventions KB
+        interventions_text = json.dumps(interventions_kb, indent=2)
+        
+        user_content = f"""{ACTIONABLE_STEPS_PROMPT}
+
+{schema_instruction}
+
+# COMPLETE HYPOTHESIS PICTURE
+{hypotheses_text}
+
+# INTERVENTIONS KNOWLEDGE BASE
+{interventions_text}
+
+Generate a holistic intervention plan with 2-3 approaches now:"""
+        
+        messages = [
+            {"role": "user", "content": user_content}
+        ]
+        
+        content = with_retries(lambda: self.llm.chat(model=self.model, messages=messages, temperature=0.2))
+        data = parse_json_or_raise(content)
+        
+        try:
+            return ActionableStepsOutput.model_validate(data)
+        except ValidationError as ve:
+            log.error(f"ActionableSteps JSON failed validation: {ve}\nRaw payload: {json.dumps(data, indent=2)}")
+            raise
+
 
 # ---------- AutoGen Adapter (optional) ----------
 class AutoGenAdapter:

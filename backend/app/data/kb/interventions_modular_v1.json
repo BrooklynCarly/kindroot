@@ -1,0 +1,1171 @@
+{
+  "kb_id": "c2385e91-a7a3-45b2-9870-90f398996bfb",
+  "title": "Prioritized Interventions for Neurodevelopmental Symptoms \u2014 Knowledge Base (Merged) \u2014 Modular v1.1",
+  "version": "1.1",
+  "created_at": "2025-11-05T15:50:28.790471+00:00",
+  "source_documents": [
+    "Plan for Viable Intervention Recommendations.docx",
+    "Documenting Hope \u2014 Interventions Table (user-provided)"
+  ],
+  "modeling_principles": {
+    "approach": "foundation_first",
+    "pillars": [
+      "Gastrointestinal health & nutrition",
+      "Metabolic & mitochondrial function",
+      "Detoxification & inflammation regulation"
+    ],
+    "notes": [
+      "View symptoms as downstream signals of upstream imbalances.",
+      "Start with least invasive, system-level interventions before targeted/complex care.",
+      "Use genetics as a vulnerability map; environment & nutrition can modulate expression.",
+      "Organize interventions as small, testable modules.",
+      "Each item includes an Implementation Card to keep actions concrete and trackable.",
+      "Non-prescriptive; families should consult clinicians for dosing and medical decisions."
+    ]
+  },
+  "kb_items": [
+    {
+      "id": "diet_additive_free",
+      "name": "Additive/Dye-free (Feingold-style) starter module",
+      "category": "Diet",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Hyperactivity, irritability, headaches, 'wired' behavior"
+        ],
+        "how_to_try": [
+          "Scan pantry for artificial colors, flavors, preservatives; replace with clean versions.",
+          "Swap juices/sodas for water or sparkling water.",
+          "Replace boxed snacks with short-ingredient alternatives."
+        ],
+        "what_to_track": [
+          "Late-day hyperactivity",
+          "Headaches",
+          "Sleep onset latency"
+        ],
+        "when_to_stop_or_escalate": [
+          "No change after 2 weeks \u2192 move to GFCF; if better but partial \u2192 layer omega-3 (EPA-focused)."
+        ],
+        "product_criteria": [
+          "Short ingredient lists",
+          "No artificial colors/flavors/sweeteners",
+          "Allergen-clean labels"
+        ]
+      },
+      "legacy_aliases": [
+        "Additive-free diet"
+      ]
+    },
+    {
+      "id": "diet_gfcf",
+      "name": "Gluten/Casein-free baseline (\u00b1 soy-free)",
+      "category": "Diet",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Eczema, constipation/diarrhea, reflux, behavior spikes after dairy/gluten"
+        ],
+        "how_to_try": [
+          "Replace breads/pastas with certified gluten-free; swap dairy milk/yogurt with fortified alternatives.",
+          "Clear hidden dairy (casein/whey) and gluten cross-contamination.",
+          "Consider soy-free for 2 weeks if still reactive."
+        ],
+        "what_to_track": [
+          "Stool consistency",
+          "Skin/eczema scoring",
+          "Irritability post-meals"
+        ],
+        "when_to_stop_or_escalate": [
+          "No change after 3\u20134 weeks \u2192 consider low-glutamate or low-histamine track; GI consult if severe."
+        ],
+        "product_criteria": [
+          "Certified GF",
+          "Dairy-free without 'natural flavors' where possible",
+          "Fortified alt-milks with calcium/vitamin D"
+        ]
+      },
+      "legacy_aliases": [
+        "Change the diet (remove gluten, casein, sugar, additives, GMOs)"
+      ]
+    },
+    {
+      "id": "diet_low_glutamate",
+      "name": "Low-Glutamate (excitatory amino acids) module",
+      "category": "Diet",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Echolalia, stimming, late-day 'wired', headaches, sleep fragmentation"
+        ],
+        "how_to_try": [
+          "Purge stocks/sauces with 'natural flavors', hydrolyzed proteins, yeast extracts.",
+          "Use whole-food broths; protein + whole-food carbs at each meal.",
+          "Front-load protein earlier in the day; avoid MSG-heavy restaurant items."
+        ],
+        "what_to_track": [
+          "Bedtime settle time",
+          "Night waking",
+          "Headache frequency"
+        ],
+        "when_to_stop_or_escalate": [
+          "No change after 2 weeks \u2192 layer magnesium glycinate and P5P; if worse, revert and reassess."
+        ]
+      }
+    },
+    {
+      "id": "diet_low_histamine",
+      "name": "Low-Histamine path (\u00b1 DAO enzyme)",
+      "category": "Diet",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Hives/flushing, 'wired-tired', seasonal allergies, nasal congestion"
+        ],
+        "how_to_try": [
+          "Reduce aged/fermented foods and leftovers; cook fresh when possible.",
+          "Trial an over-the-counter DAO supplement before higher-histamine meals.",
+          "Add vitamin C and quercetin/luteolin bundle if tolerated."
+        ],
+        "what_to_track": [
+          "Skin symptoms",
+          "Congestion",
+          "Sleep onset"
+        ],
+        "when_to_stop_or_escalate": [
+          "No response in 2\u20133 weeks \u2192 consider SIBO rule-out; if reactive to probiotics, switch to Bifido-forward strains."
+        ],
+        "starter_options": [
+          "DAO enzyme with meals",
+          "Vitamin C",
+          "Quercetin + luteolin"
+        ]
+      },
+      "safety_notes": "DAO is a nutrient enzyme; check interactions; for severe MCAS symptoms seek clinician guidance."
+    },
+    {
+      "id": "diet_low_fodmap",
+      "name": "Low-FODMAP (short-term, supervised) for SIBO-like bloating",
+      "category": "Diet",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Bloating, gas, abdominal pain, stool changes suggesting SIBO"
+        ],
+        "how_to_try": [
+          "2\u20136 week elimination under guidance; reintroduce systematically.",
+          "Pair with targeted antimicrobial therapy if SIBO confirmed/suspected.",
+          "Transition to diverse, fiber-positive maintenance diet after."
+        ],
+        "what_to_track": [
+          "Bloat score",
+          "Gas frequency",
+          "Stool pattern"
+        ],
+        "when_to_stop_or_escalate": [
+          "If symptoms rebound on reintroduction \u2192 pursue breath test and clinician support."
+        ]
+      },
+      "safety_notes": "Short-term only; risk of microbiome narrowing if prolonged."
+    },
+    {
+      "id": "diet_scd_gaps",
+      "name": "SCD/GAPS gut-healing template (advanced)",
+      "category": "Diet",
+      "priority_tier": "Advanced",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Refractory GI inflammation, poor tolerance to simpler modules"
+        ],
+        "how_to_try": [
+          "Commit to careful staged reintroductions and symptom logging.",
+          "Ensure adequate calories/protein; consider RD support.",
+          "Add mucosal support (zinc carnosine) during early phases."
+        ],
+        "what_to_track": [
+          "Stool, weight trajectory",
+          "Energy",
+          "Behavior post meals"
+        ],
+        "when_to_stop_or_escalate": [
+          "If weight loss or rigidity increases \u2192 de-escalate; simpler modules preferred for most families."
+        ]
+      }
+    },
+    {
+      "id": "diet_low_oxalate",
+      "name": "Low-Oxalate taper (slow)",
+      "category": "Diet",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Sandy stools, urinary irritation, joint pains, vulvar irritation"
+        ],
+        "how_to_try": [
+          "Gradually reduce high-oxalate foods; avoid abrupt drops.",
+          "Increase calcium with meals to bind oxalate.",
+          "Support bowels; consider magnesium citrate if constipated."
+        ],
+        "what_to_track": [
+          "Stool texture",
+          "Urinary discomfort",
+          "Joint discomfort"
+        ],
+        "when_to_stop_or_escalate": [
+          "If symptoms worsen (dumping) \u2192 slow down and ensure mineral support."
+        ]
+      }
+    },
+    {
+      "id": "gi_prebiotic_phgg",
+      "name": "Prebiotic: PHGG (partially hydrolyzed guar gum)",
+      "category": "GI/Microbiome",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Constipation, post-antibiotic recovery, butyrate support"
+        ],
+        "how_to_try": [
+          "Start low once daily; increase every 3\u20134 days as tolerated.",
+          "Add to liquids or smoothies; maintain hydration.",
+          "Layer with Bifido-forward probiotic after 1\u20132 weeks if tolerated."
+        ],
+        "what_to_track": [
+          "Stool (Bristol)",
+          "Gas/bloat",
+          "Behavior variability"
+        ],
+        "when_to_stop_or_escalate": [
+          "If gas/bloat >10 days \u2192 reduce dose or pause; consider SIBO assessment."
+        ],
+        "product_criteria": [
+          "Single-ingredient PHGG",
+          "Discloses grams per serving",
+          "Third-party tested"
+        ]
+      }
+    },
+    {
+      "id": "gi_probiotic_constipation",
+      "name": "Probiotic goal: constipation-leaning (B. lactis BB-12 anchor)",
+      "category": "GI/Microbiome",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Hard stools, infrequent bowel movements, straining"
+        ],
+        "how_to_try": [
+          "Single daily dose with food for 2 weeks.",
+          "If tolerated, add PHGG prebiotic.",
+          "Reassess stool daily; adjust hydration and magnesium as needed."
+        ],
+        "what_to_track": [
+          "Stool frequency",
+          "Stool form",
+          "Abdominal comfort"
+        ],
+        "when_to_stop_or_escalate": [
+          "If no change \u2192 switch strain set or add magnesium citrate daytime."
+        ],
+        "product_criteria": [
+          "Strain IDs on label",
+          "CFU at expiry",
+          "No artificial colors/sweeteners"
+        ]
+      }
+    },
+    {
+      "id": "gi_probiotic_loose",
+      "name": "Probiotic goal: post-antibiotic/loose stools (S. boulardii + multi-strain)",
+      "category": "GI/Microbiome",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Loose stools, post-antibiotic recovery"
+        ],
+        "how_to_try": [
+          "Use S. boulardii for 1\u20134 weeks; pair with lacto/bifido multi-strain.",
+          "Hydrate and add soluble fiber once stools begin to form.",
+          "Re-assess after 2 weeks."
+        ],
+        "what_to_track": [
+          "Stool frequency",
+          "Urgency",
+          "Hydration status"
+        ],
+        "when_to_stop_or_escalate": [
+          "If diarrhea persists >48\u201372h with fever/blood \u2192 medical evaluation."
+        ]
+      }
+    },
+    {
+      "id": "gi_probiotic_histamine",
+      "name": "Probiotic goal: histamine-conscious (Bifido-forward)",
+      "category": "GI/Microbiome",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Hives/flushing, seasonal allergies, 'wired-tired'"
+        ],
+        "how_to_try": [
+          "Start single-capsule Bifido-forward formula.",
+          "Avoid histamine-raising strains initially; consider PHGG after 1\u20132 weeks.",
+          "If reactive, pause and pursue low-histamine diet first."
+        ],
+        "what_to_track": [
+          "Skin symptoms",
+          "Sleep onset",
+          "Congestion"
+        ],
+        "when_to_stop_or_escalate": [
+          "If intolerance persists \u2192 assess histamine pathway and consider DAO/mechanistic supports."
+        ]
+      }
+    },
+    {
+      "id": "gi_digestive_enzymes",
+      "name": "Digestive enzymes (broad-spectrum \u00b1 DPP-IV)",
+      "category": "GI/Microbiome",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Bloating, post-meal discomfort, not ready for strict GFCF"
+        ],
+        "how_to_try": [
+          "Take with first bite of meals containing proteins/carbs/fats.",
+          "Assess for changes in post-meal behavior and stool.",
+          "Use as bridge while diet changes are trialed."
+        ],
+        "what_to_track": [
+          "Post-meal bloat",
+          "Stool changes",
+          "Behavior in 2h post-meal window"
+        ],
+        "when_to_stop_or_escalate": [
+          "No change after 2\u20133 weeks \u2192 discontinue and refocus on diet modules."
+        ],
+        "product_criteria": [
+          "Discloses enzyme activities (e.g., DU, HUT, ALU)",
+          "Contains DPP-IV if gluten/dairy accidental exposure likely"
+        ]
+      }
+    },
+    {
+      "id": "gi_butyrate_support",
+      "name": "Butyrate support (tributyrin or prebiotic route)",
+      "category": "GI/Microbiome",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Inflammation, stool irregularity, low short-chain fatty acids"
+        ],
+        "how_to_try": [
+          "Trial tributyrin capsule with meals OR emphasize prebiotic fibers that raise butyrate.",
+          "If using tributyrin, start low due to odor/GI sensitivity.",
+          "Monitor stool and behavior."
+        ],
+        "what_to_track": [
+          "Stool regularity",
+          "Abdominal comfort",
+          "Irritability"
+        ],
+        "when_to_stop_or_escalate": [
+          "If intolerance \u2192 revert to prebiotic-only approach."
+        ]
+      }
+    },
+    {
+      "id": "gi_mucosal_support",
+      "name": "Mucosal support (zinc-carnosine \u00b1 L-glutamine*)",
+      "category": "GI/Microbiome",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Reflux, mucosal irritation, leaky gut signs"
+        ],
+        "how_to_try": [
+          "Add zinc-carnosine with meals for 4\u20138 weeks.",
+          "Consider cautious L-glutamine if clinician recommends.",
+          "Continue probiotic/prebiotic base."
+        ],
+        "what_to_track": [
+          "Reflux score",
+          "Stool integrity",
+          "Meal-related discomfort"
+        ],
+        "when_to_stop_or_escalate": [
+          "Stop if nausea develops; reassess if no change after 4 weeks."
+        ]
+      },
+      "safety_notes": "*L-glutamine may not suit all (excitability); clinician guidance advised."
+    },
+    {
+      "id": "gi_sibo_path",
+      "name": "SIBO pathway (test-and-treat)",
+      "category": "GI/Microbiome",
+      "priority_tier": "Advanced",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Refractory bloating, gas, constipation or diarrhea cycles"
+        ],
+        "how_to_try": [
+          "Breath test (lactulose/glucose) via clinician.",
+          "If positive: short-term antimicrobial protocol + low-FODMAP supervised.",
+          "Rebuild with pre/probiotics; liberalize diet gradually."
+        ],
+        "what_to_track": [
+          "Bloat, gas",
+          "Stool pattern",
+          "Food tolerance breadth"
+        ],
+        "when_to_stop_or_escalate": [
+          "If symptoms persist despite protocol \u2192 evaluate motility, adhesions, or other causes."
+        ]
+      }
+    },
+    {
+      "id": "min_magnesium",
+      "name": "Magnesium strategy (glycinate/citrate/threonate)",
+      "category": "Minerals/Vitamins",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Sleep fragmentation, constipation, tension, headaches"
+        ],
+        "how_to_try": [
+          "If sleep: glycinate nightly.",
+          "If constipation: citrate in small day doses.",
+          "If cognitive: threonate trial daytime."
+        ],
+        "what_to_track": [
+          "Sleep onset & night wakes",
+          "Stool form",
+          "Muscle tension/headaches"
+        ],
+        "when_to_stop_or_escalate": [
+          "Loose stools/cramps \u2192 reduce dose or change form."
+        ],
+        "product_criteria": [
+          "Elemental magnesium disclosed",
+          "Dye-free",
+          "Third-party tested"
+        ]
+      }
+    },
+    {
+      "id": "min_zinc",
+      "name": "Zinc repletion (taste/appetite/immune)",
+      "category": "Minerals/Vitamins",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Picky eating, poor taste/smell, frequent illness, skin issues"
+        ],
+        "how_to_try": [
+          "Trial gentle zinc with food for 2\u20134 weeks.",
+          "Pair with copper awareness on longer courses.",
+          "Re-test labs if guided by clinician."
+        ],
+        "what_to_track": [
+          "Appetite breadth",
+          "Illness frequency",
+          "Skin quality"
+        ],
+        "when_to_stop_or_escalate": [
+          "Nausea \u2192 switch form or lower dose; check copper if long-term."
+        ]
+      }
+    },
+    {
+      "id": "vit_b6_p5p",
+      "name": "Vitamin B6 (as P5P) \u2013 methylation phase 1",
+      "category": "Minerals/Vitamins",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Tics, irritability, low dream recall, methylation prep"
+        ],
+        "how_to_try": [
+          "Add low-dose P5P with magnesium for 2 weeks.",
+          "Observe behavior/sleep; adjust timing."
+        ],
+        "what_to_track": [
+          "Irritability",
+          "Tics",
+          "Sleep quality"
+        ],
+        "when_to_stop_or_escalate": [
+          "Over-arousal \u2192 reduce or discontinue."
+        ]
+      }
+    },
+    {
+      "id": "methyl_folate",
+      "name": "Folate support (folinic acid or 5-MTHF) \u2013 phase 2",
+      "category": "Methylation",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "MTHFR variants, low folate status, CFD considerations"
+        ],
+        "how_to_try": [
+          "Start with folinic acid if CFD suspected; otherwise 5-MTHF low-dose.",
+          "Keep magnesium/B6 in place.",
+          "Track behavior for 2\u20133 weeks."
+        ],
+        "what_to_track": [
+          "Language, attention",
+          "Irritability",
+          "Sleep onset"
+        ],
+        "when_to_stop_or_escalate": [
+          "Paradoxical activation \u2192 pause and reassess folate form."
+        ]
+      },
+      "notes": "Use FRAA/FRAT result to favor folinic acid in CFD."
+    },
+    {
+      "id": "methyl_mb12",
+      "name": "Methyl-B12 \u2013 phase 3",
+      "category": "Methylation",
+      "priority_tier": "Advanced",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Language delays, attention/focus after phases 1\u20132 in place"
+        ],
+        "how_to_try": [
+          "Start very low, titrate slowly (clinician-guided).",
+          "Prefer morning dosing to watch for activation.",
+          "Maintain magnesium/B6 foundation."
+        ],
+        "what_to_track": [
+          "Language attempts",
+          "Attention span",
+          "Irritability"
+        ],
+        "when_to_stop_or_escalate": [
+          "Activation/insomnia \u2192 reduce or discontinue; consult clinician."
+        ]
+      },
+      "safety_notes": "Dosing and route require clinician guidance."
+    },
+    {
+      "id": "vit_d",
+      "name": "Vitamin D optimization",
+      "category": "Minerals/Vitamins",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Low sun exposure, frequent illness, poor sleep"
+        ],
+        "how_to_try": [
+          "Check baseline if possible; otherwise start age-appropriate maintenance.",
+          "Pair with magnesium; take with fat-containing food."
+        ],
+        "what_to_track": [
+          "Sleep quality",
+          "Illness frequency",
+          "Mood stability"
+        ],
+        "when_to_stop_or_escalate": [
+          "If high-dose considered \u2192 lab monitoring required."
+        ]
+      }
+    },
+    {
+      "id": "omega3_epa",
+      "name": "Omega-3 (EPA-focused)",
+      "category": "Minerals/Vitamins",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Irritability, attention, skin dryness"
+        ],
+        "how_to_try": [
+          "Start a child-appropriate liquid or softgel with meals.",
+          "Aim for higher EPA: DHA ratio at start.",
+          "Check for reflux; split dose if needed."
+        ],
+        "what_to_track": [
+          "Irritability",
+          "Focus",
+          "Skin quality"
+        ],
+        "when_to_stop_or_escalate": [
+          "Fishy burps/irritation \u2192 switch form or emulsified product."
+        ],
+        "product_criteria": [
+          "IFOS/third-party tested",
+          "EPA-dominant",
+          "Minimal flavors"
+        ]
+      }
+    },
+    {
+      "id": "antioxidants_core",
+      "name": "Core redox support (C, E-mixed, NAC/glutathione)",
+      "category": "Antioxidants",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Oxidative stress signs, frequent illness, behavior spikes with illness"
+        ],
+        "how_to_try": [
+          "Begin with vitamin C; add mixed tocopherols/tocotrienols.",
+          "Trial NAC or liposomal glutathione if tolerated."
+        ],
+        "what_to_track": [
+          "Illness recovery time",
+          "Behavior during colds",
+          "Skin/lung inflammation"
+        ],
+        "when_to_stop_or_escalate": [
+          "Sulfur sensitivity (worsening behavior) \u2192 reduce NAC/GSH; consider alternatives."
+        ]
+      },
+      "notes": "Avoid high-dose E long-term without clinician guidance."
+    },
+    {
+      "id": "antioxidants_nrf2",
+      "name": "NRF2 activators (sulforaphane, curcumin)",
+      "category": "Antioxidants",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Inflammation, irritability, sluggish detox phenotype"
+        ],
+        "how_to_try": [
+          "Start sulforaphane from stabilized extract or sprouts; add curcumin if tolerated.",
+          "Take with food; watch stools/skin."
+        ],
+        "what_to_track": [
+          "Irritability",
+          "Stool",
+          "Skin/aches"
+        ],
+        "when_to_stop_or_escalate": [
+          "GI upset \u2192 lower dose or pause; turmeric sensitivity in some."
+        ]
+      }
+    },
+    {
+      "id": "antioxidants_mastcell",
+      "name": "Mast-cell-friendly antioxidants (quercetin + luteolin + vitamin C)",
+      "category": "Antioxidants",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Hives/flushing, seasonal allergies, histamine issues"
+        ],
+        "how_to_try": [
+          "Quercetin/luteolin bundle before high-histamine meals.",
+          "Vitamin C daily divided doses."
+        ],
+        "what_to_track": [
+          "Skin",
+          "Nasal symptoms",
+          "Sleep onset"
+        ],
+        "when_to_stop_or_escalate": [
+          "Headache/GI upset \u2192 reduce dose; evaluate histamine triggers."
+        ]
+      }
+    },
+    {
+      "id": "antioxidants_mito",
+      "name": "Mito-centric antioxidants (CoQ10, ALA)",
+      "category": "Antioxidants",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Low energy, exercise intolerance, attention issues"
+        ],
+        "how_to_try": [
+          "Start ubiquinol (reduced CoQ10) with fat-containing meal.",
+          "Consider alpha-lipoic acid with caution if glucose swings."
+        ],
+        "what_to_track": [
+          "Energy",
+          "Attention",
+          "Exercise tolerance"
+        ],
+        "when_to_stop_or_escalate": [
+          "Activation or GI upset \u2192 reduce; monitor blood sugar with ALA."
+        ]
+      }
+    },
+    {
+      "id": "mito_alcar",
+      "name": "Acetyl-L-carnitine (ALCAR)",
+      "category": "Mitochondrial",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Attention/motivation, low tone"
+        ],
+        "how_to_try": [
+          "Start mornings; evaluate focus/energy over 2 weeks.",
+          "Combine with omega-3 and magnesium foundation."
+        ],
+        "what_to_track": [
+          "Attention",
+          "Motivation",
+          "Energy"
+        ],
+        "when_to_stop_or_escalate": [
+          "Activation/irritability \u2192 reduce dose or stop."
+        ]
+      }
+    },
+    {
+      "id": "mito_creatine",
+      "name": "Creatine (clinician-guided)",
+      "category": "Mitochondrial",
+      "priority_tier": "Advanced",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Low tone/strength, endurance issues"
+        ],
+        "how_to_try": [
+          "Trial under clinician guidance; ensure hydration.",
+          "Track stools and behavior."
+        ],
+        "what_to_track": [
+          "Energy",
+          "Strength/endurance",
+          "GI tolerance"
+        ],
+        "when_to_stop_or_escalate": [
+          "GI cramps/loose stools \u2192 reduce or stop; not for kidney disease."
+        ]
+      },
+      "safety_notes": "Use only with clinician input."
+    },
+    {
+      "id": "immune_mastcell_bundle",
+      "name": "Mast-cell modulation bundle (quercetin + luteolin + vitamin C)",
+      "category": "Immune/MCAS",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Histamine overlay, seasonal flares, hives"
+        ],
+        "how_to_try": [
+          "Dose 30\u201360 minutes before meals or exposures.",
+          "Pair with low-histamine eating initially."
+        ],
+        "what_to_track": [
+          "Skin",
+          "Congestion",
+          "Sleep onset"
+        ],
+        "when_to_stop_or_escalate": [
+          "No benefit in 2\u20133 weeks \u2192 reassess histamine path and probiotics."
+        ]
+      }
+    },
+    {
+      "id": "env_air_water",
+      "name": "Air & water quality upgrades",
+      "category": "Environment",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Allergy overlay, chronic congestion, frequent illness"
+        ],
+        "how_to_try": [
+          "HEPA purifier in bedroom; encase dust-mite-prone bedding.",
+          "Point-of-use water filter; fix moisture/mold sources."
+        ],
+        "what_to_track": [
+          "Nasal congestion",
+          "Night waking",
+          "Illness days"
+        ],
+        "when_to_stop_or_escalate": [
+          "No change after 4 weeks \u2192 explore histamine/MCAS or airway path."
+        ]
+      }
+    },
+    {
+      "id": "sleep_circadian",
+      "name": "Sunlight & circadian anchoring",
+      "category": "Sleep/Airway",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Sleep onset delay, frequent night waking, morning grogginess"
+        ],
+        "how_to_try": [
+          "AM outdoor light 10\u201320 minutes daily; dim lights/screens 1\u20132h before bed.",
+          "Consistent sleep/wake schedule; cool, dark bedroom."
+        ],
+        "what_to_track": [
+          "Sleep onset",
+          "Night wakes",
+          "Morning mood"
+        ],
+        "when_to_stop_or_escalate": [
+          "If persistent snoring/mouth breathing \u2192 ENT screen."
+        ]
+      }
+    },
+    {
+      "id": "airway_ent_screen",
+      "name": "ENT/Airway screen (snoring, adenoids, mouth breathing)",
+      "category": "Sleep/Airway",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Habitual snoring, daytime mouth-breathing, restless sleep"
+        ],
+        "how_to_try": [
+          "Primary care referral \u2192 ENT evaluation; consider sleep study if red flags.",
+          "Address nasal hygiene; trial myofunctional therapy if indicated."
+        ],
+        "what_to_track": [
+          "Snoring loudness",
+          "Mouth breathing",
+          "Daytime sleepiness"
+        ],
+        "when_to_stop_or_escalate": [
+          "Normal study but symptoms persist \u2192 myofunctional therapy and allergy management."
+        ]
+      }
+    },
+    {
+      "id": "airway_myofunctional",
+      "name": "Myofunctional therapy (if indicated)",
+      "category": "Sleep/Airway",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Mouth-breathing, low tongue posture, orthodontic crowding"
+        ],
+        "how_to_try": [
+          "Weekly exercises under therapist guidance.",
+          "Daily home practice; pair with airway hygiene."
+        ],
+        "what_to_track": [
+          "Snoring/mouth breathing",
+          "Oral posture",
+          "Sleep quality"
+        ],
+        "when_to_stop_or_escalate": [
+          "Poor adherence \u2192 simplify routine; reassess candidacy."
+        ]
+      }
+    },
+    {
+      "id": "therapy_pt",
+      "name": "Physical therapy (endurance/tone/gait)",
+      "category": "Therapies",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Hypotonia, endurance limits, clumsiness"
+        ],
+        "how_to_try": [
+          "Weekly sessions + home program; track endurance (walk time) weekly.",
+          "Layer creatine only if clinician-guided."
+        ],
+        "what_to_track": [
+          "Walk time/distance",
+          "Stairs tolerance",
+          "Fatigue"
+        ],
+        "when_to_stop_or_escalate": [
+          "Plateau >8 weeks \u2192 adjust goals/intensity."
+        ]
+      }
+    },
+    {
+      "id": "therapy_sos_feeding",
+      "name": "Feeding therapy (SOS approach) for severe selectivity",
+      "category": "Therapies",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Severe food selectivity beyond coaching"
+        ],
+        "how_to_try": [
+          "Weekly therapy; home sensory desensitization and food chaining.",
+          "Parallel nutrition: magnesium, zinc, fiber."
+        ],
+        "what_to_track": [
+          "Accepted foods count",
+          "Meal distress",
+          "GI symptoms"
+        ],
+        "when_to_stop_or_escalate": [
+          "Regression or distress \u2192 slow pace, adjust chaining steps."
+        ]
+      }
+    },
+    {
+      "id": "therapy_aac",
+      "name": "AAC readiness & parallel communication supports",
+      "category": "Therapies",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Minimally verbal or apraxia features"
+        ],
+        "how_to_try": [
+          "Trial low-tech boards and simple AAC apps; train caregivers.",
+          "Embed AAC in routines; model generously."
+        ],
+        "what_to_track": [
+          "Initiations/day",
+          "Requests made",
+          "Frustration behaviors"
+        ],
+        "when_to_stop_or_escalate": [
+          "No uptake \u2192 adjust vocabulary, increase modeling, consult SLP."
+        ]
+      }
+    },
+    {
+      "id": "therapy_parent_mediated",
+      "name": "Parent-mediated programs (PRT/ESDM/PCIT-adapted coaching)",
+      "category": "Therapies",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Social communication goals, behavior shaping"
+        ],
+        "how_to_try": [
+          "Weekly coaching; daily 10\u201320 min practice blocks.",
+          "Use simple data sheets to track trials and successes."
+        ],
+        "what_to_track": [
+          "Requests per hour",
+          "Joint attention moments",
+          "Tantrum duration"
+        ],
+        "when_to_stop_or_escalate": [
+          "Stalled progress \u2192 refine targets; add reinforcement variety."
+        ]
+      }
+    },
+    {
+      "id": "workup_iron",
+      "name": "Iron status with ferritin",
+      "category": "Workups",
+      "priority_tier": "Foundation",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Pica, fatigue, restless sleep, low ferritin history"
+        ],
+        "how_to_try": [
+          "Order labs via clinician; if low, consider repletion with vitamin C.",
+          "Re-check after course."
+        ],
+        "what_to_track": [
+          "Ferritin",
+          "Sleep quality",
+          "Energy"
+        ],
+        "when_to_stop_or_escalate": [
+          "GI side effects \u2192 change form or dose; clinician oversight needed."
+        ]
+      },
+      "safety_notes": "Lab-guided; avoid excess."
+    },
+    {
+      "id": "workup_rbc_mg_zinc",
+      "name": "RBC magnesium & zinc (cellular status)",
+      "category": "Workups",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Muscle tension, headaches, picky eating, frequent illness"
+        ],
+        "how_to_try": [
+          "Order labs via clinician.",
+          "Use results to guide mineral strategy."
+        ],
+        "what_to_track": [
+          "Symptom change post-repletion"
+        ],
+        "when_to_stop_or_escalate": [
+          "N/A"
+        ]
+      }
+    },
+    {
+      "id": "workup_frat_cfd",
+      "name": "FRAA/FRAT and CFD pathway",
+      "category": "Workups",
+      "priority_tier": "Targeted",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Developmental regression, speech delay with folate issues suspected"
+        ],
+        "how_to_try": [
+          "Test FRAA/FRAT via clinician.",
+          "If positive, prefer folinic acid; consider leucovorin strategies per clinician."
+        ],
+        "what_to_track": [
+          "Language attempts",
+          "Behavior stability",
+          "Sleep"
+        ],
+        "when_to_stop_or_escalate": [
+          "Activation or intolerance \u2192 adjust folate form with clinician."
+        ]
+      },
+      "safety_notes": "Specialist-guided when positive."
+    },
+    {
+      "id": "workup_sdb",
+      "name": "Sleep-disordered breathing screen",
+      "category": "Workups",
+      "priority_tier": "Core",
+      "implementation_card": {
+        "who_it_may_help": [
+          "Snoring, mouth-breathing, night sweats, restless sleep"
+        ],
+        "how_to_try": [
+          "Validated questionnaires; consider sleep study referral.",
+          "Address ENT issues; myofunctional therapy if indicated."
+        ],
+        "what_to_track": [
+          "Snoring index",
+          "Night wakes",
+          "Daytime behavior"
+        ],
+        "when_to_stop_or_escalate": [
+          "Normal study but symptoms persist \u2192 pursue allergy/MCAS track."
+        ]
+      }
+    }
+  ],
+  "symptom_starter_catalog": [
+    {
+      "symptom": "Sleep fragmentation",
+      "starter_stack": [
+        "min_magnesium",
+        "diet_low_glutamate",
+        "gi_probiotic_constipation",
+        "sleep_circadian"
+      ]
+    },
+    {
+      "symptom": "Irritability/Aggression",
+      "starter_stack": [
+        "gi_prebiotic_phgg",
+        "antioxidants_core",
+        "min_magnesium",
+        "diet_low_histamine"
+      ]
+    },
+    {
+      "symptom": "Anxiety/OCD (gradual onset)",
+      "starter_stack": [
+        "gi_probiotic_histamine",
+        "diet_low_glutamate",
+        "antioxidants_mastcell",
+        "vit_b6_p5p"
+      ]
+    },
+    {
+      "symptom": "Inattention/Focus",
+      "starter_stack": [
+        "diet_additive_free",
+        "omega3_epa",
+        "min_zinc",
+        "mito_alcar"
+      ]
+    },
+    {
+      "symptom": "Constipation",
+      "starter_stack": [
+        "gi_probiotic_constipation",
+        "gi_prebiotic_phgg",
+        "min_magnesium"
+      ]
+    },
+    {
+      "symptom": "Loose stools/Post-antibiotic",
+      "starter_stack": [
+        "gi_probiotic_loose",
+        "gi_prebiotic_phgg"
+      ]
+    },
+    {
+      "symptom": "Skin rashes/eczema/hives",
+      "starter_stack": [
+        "diet_gfcf",
+        "diet_low_histamine",
+        "antioxidants_mastcell",
+        "omega3_epa"
+      ]
+    }
+  ],
+  "triage_rules": [
+    "If Anxiety/OCD has abrupt, severe onset post-infection: prioritize PANS/PANDAS workup immediately.",
+    "Before behavior-focused plans, rule out pain (especially GI), sleep deficit, and mineral deficiencies.",
+    "When initiating multi-supplement protocols, add one change at a time; monitor response for 1\u20133 weeks.",
+    "Rule out pain (GI), sleep deficit, and mineral deficits before behavior-focused plans.",
+    "If snoring, mouth-breathing, or witnessed apneas exist: prioritize airway/ENT evaluation.",
+    "Sulfur sensitivity (worse on NAC/GSH) \u2192 pivot to non-sulfur antioxidants (vitamin C, E, curcumin) before retrying."
+  ],
+  "retrieval_tags": [
+    "AAC",
+    "ASD",
+    "Antioxidants",
+    "Bifido-forward",
+    "CFD",
+    "Diet",
+    "ENT",
+    "ESDM",
+    "Environment",
+    "GI/Microbiome",
+    "Immune/MCAS",
+    "Low-glutamate",
+    "Low-histamine",
+    "Methylation",
+    "Minerals/Vitamins",
+    "Mitochondrial",
+    "PHGG",
+    "PRT",
+    "SIBO",
+    "Sleep/Airway",
+    "Therapies",
+    "Workups",
+    "behavior",
+    "dietary_intervention",
+    "functional_medicine",
+    "gut_brain_axis",
+    "minerals",
+    "mitochondria",
+    "sensory",
+    "sleep",
+    "speech",
+    "vitamins"
+  ],
+  "legacy_mapping": {
+    "Change the diet (remove gluten, casein, sugar, additives, GMOs)": "diet_gfcf",
+    "Antioxidant supplementation": "antioxidants_core",
+    "Vitamin D optimization": null,
+    "Prebiotics & Probiotics": "gi_probiotic_constipation",
+    "Fermented foods": null,
+    "Allergy/sensitivity identification & removal (NAET, BioSET, LDA, elimination diet)": null,
+    "Detoxification support (glutathione, NAC, ALA, binders, baths)": null,
+    "GI tract cleanup (antimicrobials, anti-parasite, gut-healing diet)": null,
+    "Increase omega-3s / good fats": null,
+    "Low-glutamate diet + GABA support": null,
+    "Electrolytes & trace minerals": null,
+    "Hormone balancing (adrenal, thyroid, sex hormones)": null,
+    "Low-dose naltrexone": null,
+    "CPD-choline for elevated PLA2 (post-testing)": null,
+    "Urine Phospholipase-A2 test (diagnostic)": null,
+    "Methylation support": null,
+    "Mitochondrial support": null,
+    "Thyroid function assessment": null,
+    "Magnesium + gut support": null,
+    "PANS/PANDAS workup (if acute onset anxiety/OCD)": null,
+    "Occupational therapy (sensory integration)": null,
+    "Speech & language therapy (comprehension-focused)": null
+  }
+}
