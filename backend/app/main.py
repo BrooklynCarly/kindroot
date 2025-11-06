@@ -16,8 +16,9 @@ if not _found_env:
 load_dotenv(_found_env, override=True)  # Ensure latest values are loaded
 
 # Now import FastAPI and other modules after environment is loaded
-from fastapi import FastAPI, HTTPException, Query, status
+from fastapi import FastAPI, HTTPException, Query, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel
 
 # Configure logging
@@ -50,6 +51,11 @@ app = FastAPI(
     version="0.1.0"
 )
 
+# Session middleware for OAuth (must be added before other middleware)
+import secrets
+SESSION_SECRET = os.getenv("SESSION_SECRET", secrets.token_urlsafe(32))
+app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
+
 # CORS middleware configuration
 app.add_middleware(
     CORSMiddleware,
@@ -60,8 +66,12 @@ app.add_middleware(
 )
 
 # Import and register routers
-from app.routers import patients, reports
+from app.routers import patients, reports, auth
 
+# Register auth router (no /api prefix as it's already in the router)
+app.include_router(auth.router)
+
+# Register other routers
 app.include_router(patients.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
 

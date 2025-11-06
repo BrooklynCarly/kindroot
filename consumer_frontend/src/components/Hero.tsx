@@ -7,33 +7,30 @@ export default function Hero() {
         <div className="text-center space-y-8 sm:space-y-10">
           {/* Headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold text-gray-900 leading-tight">
-            Find Your Village,
+           Get real information
             <br />
-            <span className="text-primary">One Question at a Time</span>
+            <span className="text-primary">based on your unique child</span>
           </h1>
           
           {/* Supporting Text */}
           <p className="text-lg sm:text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            A quick quiz to connect you with other parents who get it. 
-            Real support, real experiences, real community.
+            Start by answering a few questions to help us get a better understanding of your childs challenges. We'll put together a custom report that shares what has worked for parents with similar kids.
           </p>
           
           {/* Primary CTA */}
           <div className="pt-4 sm:pt-6">
             <a 
               href={QUIZ_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               className="btn-primary"
               aria-label="Take the parent support quiz"
             >
-              Take the Quiz
+              Get Started
             </a>
           </div>
           
           {/* Optional subtext */}
           <p className="text-sm sm:text-base text-gray-500 pt-4">
-            Takes about 3 minutes · No email required
+            This is a free report. We'll never share your data and we won't ask anything too personal
           </p>
         </div>
       </div>

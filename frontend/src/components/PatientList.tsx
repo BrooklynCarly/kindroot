@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { FileText, ExternalLink, Loader2, RefreshCw, User, ChevronDown, ChevronRight, Mail } from 'lucide-react'
 import { Patient, ReportGenerationResponse } from '../types'
+import { useAuth } from '../contexts/AuthContext'
 
 interface PatientListProps {
   patients: Patient[]
@@ -8,6 +9,7 @@ interface PatientListProps {
 }
 
 export default function PatientList({ patients, onRefresh }: PatientListProps) {
+  const { token } = useAuth()
   const [generatingReports, setGeneratingReports] = useState<Set<number>>(new Set())
   const [generatedReports, setGeneratedReports] = useState<Map<number, string>>(new Map())
   const [errors, setErrors] = useState<Map<number, string>>(new Map())
@@ -35,7 +37,11 @@ export default function PatientList({ patients, onRefresh }: PatientListProps) {
         setLoadingSummaries(prev => new Set(prev).add(row))
         
         try {
-          const response = await fetch(`/api/patients/${row}/summary`)
+          const response = await fetch(`/api/patients/${row}/summary`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          })
           if (response.ok) {
             const data = await response.json()
             setParsedSummaries(prev => new Map(prev).set(row, data))
@@ -69,6 +75,9 @@ export default function PatientList({ patients, onRefresh }: PatientListProps) {
     try {
       const response = await fetch(`/api/email-report/${row}`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       })
 
       if (!response.ok) {
@@ -111,6 +120,9 @@ export default function PatientList({ patients, onRefresh }: PatientListProps) {
     try {
       const response = await fetch(`/api/generate-report/${row}`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       })
 
       if (!response.ok) {
