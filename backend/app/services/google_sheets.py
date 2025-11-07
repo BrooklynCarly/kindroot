@@ -8,6 +8,9 @@ from pathlib import Path
 from fastapi import HTTPException
 import time
 import socket
+import os
+import json
+import base64
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
@@ -39,11 +42,33 @@ class GoogleSheetsService:
         Build credentials for the Service Account key.
         The target Google Sheet must be shared with the service account email as an editor.
         
+        Supports two methods:
+        1. Environment variable GOOGLE_CREDENTIALS_BASE64 (for production/Render)
+        2. Local credentials.json file (for development)
+        
         Returns:
             Credentials: Service account credentials
         """
+        # Try to get credentials from environment variable first (production)
+        credentials_base64 = os.getenv("GOOGLE_CREDENTIALS_BASE64")
+        if credentials_base64:
+            try:
+                # Decode base64 and parse JSON
+                credentials_json = base64.b64decode(credentials_base64).decode('utf-8')
+                credentials_dict = json.loads(credentials_json)
+                creds = service_account.Credentials.from_service_account_info(
+                    credentials_dict, scopes=SCOPES
+                )
+                return creds
+            except Exception as e:
+                raise ValueError(f"Failed to load credentials from GOOGLE_CREDENTIALS_BASE64: {str(e)}")
+        
+        # Fall back to local file (development)
         if not CREDENTIALS_FILE.exists():
-            raise FileNotFoundError(f"Credentials file not found at {CREDENTIALS_FILE}")
+            raise FileNotFoundError(
+                f"Credentials file not found at {CREDENTIALS_FILE}. "
+                "Set GOOGLE_CREDENTIALS_BASE64 environment variable for production."
+            )
 
         creds = service_account.Credentials.from_service_account_file(
             str(CREDENTIALS_FILE), scopes=SCOPES
