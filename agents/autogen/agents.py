@@ -14,13 +14,6 @@ try:
 except Exception:  # pydantic v1 fallback if needed
     from pydantic.v1 import BaseModel, Field, ValidationError
 
-try:
-    # Make sure you have the correct library installed: pip install google-generativeai
-    import google.generativeai as genai
-except ImportError:
-    raise ImportError("google-generativeai is not installed. Please install it with 'pip install google-generativeai'")
-# ... (keep other code)
-
 # ---------- Logging ----------
 def get_logger(name: str = "kindroot.agents") -> logging.Logger:
     logger = logging.getLogger(name)
