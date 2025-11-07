@@ -5,6 +5,8 @@ import UserMenu from './components/UserMenu'
 import PatientList from './components/PatientList'
 import { Patient } from './types'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 function App() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,7 +25,7 @@ function App() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch('/api/patients', {
+      const response = await fetch(`${API_URL}/api/patients`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

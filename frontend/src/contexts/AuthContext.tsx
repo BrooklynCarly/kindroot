@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 interface User {
   email: string
   name: string
@@ -45,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserInfo = async (authToken: string) => {
     try {
-      const response = await fetch('/api/auth/me', {
+      const response = await fetch(`${API_URL}/api/auth/me`, {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -76,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = () => {
     // Redirect to backend OAuth login endpoint
-    window.location.href = '/api/auth/login'
+    window.location.href = `${API_URL}/api/auth/login`
   }
 
   const logout = () => {

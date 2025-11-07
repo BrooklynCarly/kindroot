@@ -3,6 +3,8 @@ import { FileText, ExternalLink, Loader2, RefreshCw, User, ChevronDown, ChevronR
 import { Patient, ReportGenerationResponse } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 interface PatientListProps {
   patients: Patient[]
   onRefresh: () => void
@@ -37,7 +39,7 @@ export default function PatientList({ patients, onRefresh }: PatientListProps) {
         setLoadingSummaries(prev => new Set(prev).add(row))
         
         try {
-          const response = await fetch(`/api/patients/${row}/summary`, {
+          const response = await fetch(`${API_URL}/api/patients/${row}/summary`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -73,7 +75,7 @@ export default function PatientList({ patients, onRefresh }: PatientListProps) {
     })
 
     try {
-      const response = await fetch(`/api/email-report/${row}`, {
+      const response = await fetch(`${API_URL}/api/email-report/${row}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -118,7 +120,7 @@ export default function PatientList({ patients, onRefresh }: PatientListProps) {
     })
 
     try {
-      const response = await fetch(`/api/generate-report/${row}`, {
+      const response = await fetch(`${API_URL}/api/generate-report/${row}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
