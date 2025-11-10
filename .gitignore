@@ -83,3 +83,6 @@ static/
 
 # Environment files except .env.example
 !.env.example
+
+# Local development logs
+/tmp/kindroot_*.log
