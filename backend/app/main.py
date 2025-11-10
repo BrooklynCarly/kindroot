@@ -57,9 +57,24 @@ SESSION_SECRET = os.getenv("SESSION_SECRET", secrets.token_urlsafe(32))
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
 
 # CORS middleware configuration
+# Allow both local development and production frontend
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+CONSUMER_FRONTEND_URL = os.getenv("CONSUMER_FRONTEND_URL", "http://localhost:3001")
+
+allowed_origins = [
+    "http://localhost:3000",  # Local admin frontend
+    "http://localhost:3001",  # Local consumer frontend
+]
+
+# Add production URLs if configured
+if FRONTEND_URL and FRONTEND_URL != "http://localhost:3000":
+    allowed_origins.append(FRONTEND_URL)
+if CONSUMER_FRONTEND_URL and CONSUMER_FRONTEND_URL != "http://localhost:3001":
+    allowed_origins.append(CONSUMER_FRONTEND_URL)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React frontend default port
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
