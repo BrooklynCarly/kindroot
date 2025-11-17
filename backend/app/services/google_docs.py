@@ -559,12 +559,7 @@ class GoogleDocsService:
                 notes = intervention.get('important_notes')
                 if notes:
                     add_paragraph(f"Important: {notes}")
-                
                 add_paragraph("")
-            
-            add_paragraph("")
-            add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
-            add_paragraph("")
         
         # General notes
         general_notes = actionable_steps.get('general_notes', [])
