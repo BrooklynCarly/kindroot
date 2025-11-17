@@ -511,17 +511,50 @@ class GoogleDocsService:
             # Use text format (table disabled due to index tracking issues)
             for i, intervention in enumerate(approaches, 1):
                 add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
+                
+                # Why this may help
                 why_help = intervention.get('why_this_may_help')
                 if why_help:
                     add_paragraph(f"Why this may help: {why_help}")
+                
+                # Addresses multiple concerns
                 concerns = intervention.get('addresses_multiple_concerns', [])
                 if concerns:
                     add_paragraph("May help with: " + ", ".join(concerns))
+                
+                # What others have done
                 what_done = intervention.get('what_others_have_done', [])
                 if what_done:
                     add_paragraph("What others have done:")
                     for action in what_done:
                         add_paragraph(f"  • {action}")
+                
+                # What families tracked
+                tracked = intervention.get('what_families_tracked', [])
+                if tracked:
+                    add_paragraph("What families tracked:")
+                    for item in tracked:
+                        add_paragraph(f"  • {item}")
+                
+                # Common decision points
+                decision_points = intervention.get('common_decision_points', [])
+                if decision_points:
+                    add_paragraph("Common decision points:")
+                    for point in decision_points:
+                        add_paragraph(f"  • {point}")
+                
+                # Considerations
+                considerations = intervention.get('considerations', [])
+                if considerations:
+                    add_paragraph("Considerations:")
+                    for consideration in considerations:
+                        add_paragraph(f"  • {consideration}")
+                
+                # Important notes
+                notes = intervention.get('important_notes')
+                if notes:
+                    add_paragraph(f"Important: {notes}")
+                
                 add_paragraph("")
             
             add_paragraph("")
