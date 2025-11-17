@@ -802,141 +802,6 @@ class GoogleDocsService:
                     add_paragraph("")
                 
                 # State Early Intervention Program
-        ei_program = summary_report.get('state_early_intervention_program', {})
-        if ei_program:
-            add_paragraph("State Early Intervention Program", "HEADING_4")
-            website = ei_program.get('website')
-            if website:
-                add_link("Website", website)
-            if ei_program.get('contact_phone'):
-                add_paragraph(f"Phone: {ei_program.get('contact_phone')}")
-            if ei_program.get('contact_email'):
-                add_paragraph(f"Email: {ei_program.get('contact_email')}")
-        # Pediatricians / Developmental Pediatrics
-        peds = summary_report.get('pediatricians', [])
-        if peds:
-            add_paragraph("Pediatricians / Developmental Pediatrics", "HEADING_4")
-            for i, provider in enumerate(peds, 1):
-                add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
-                rating = provider.get('rating'); reviews = provider.get('review_count')
-                if rating is not None:
-                    txt = f"Rating: {rating:.1f}/5.0"
-                    if reviews: txt += f" ({reviews} reviews)"
-                    add_paragraph(txt)
-                if provider.get('distance_miles') is not None:
-                    add_paragraph(f"Distance: {provider['distance_miles']:.1f} miles")
-                add_paragraph(f"Address: {provider.get('address','N/A')}")
-                if provider.get('phone'): add_paragraph(f"Phone: {provider['phone']}")
-                if provider.get('website'): add_link("Website", provider['website'])
-                if provider.get('specialties'):
-                    add_paragraph("Specialties: " + ', '.join(provider['specialties']))
-                add_paragraph("")
-
-        # Behavioral Providers
-        behavioral_providers = summary_report.get('behavioral_providers', [])
-        if behavioral_providers:
-            add_paragraph("Behavioral Providers", "HEADING_4")
-            for i, provider in enumerate(behavioral_providers, 1):
-                add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
-
-                # Rating and reviews
-                rating = provider.get('rating')
-                review_count = provider.get('review_count')
-                if rating is not None:
-                    rating_text = f"Rating: {rating:.1f}/5.0"
-                    if review_count:
-                        rating_text += f" ({review_count} reviews)"
-                    add_paragraph(rating_text)
-
-                # Distance
-                distance = provider.get('distance_miles')
-                if distance is not None:
-                    add_paragraph(f"Distance: {distance:.1f} miles")
-
-                add_paragraph(f"Address: {provider.get('address', 'N/A')}")
-
-                if provider.get('phone'):
-                    add_paragraph(f"Phone: {provider.get('phone')}")
-
-                website = provider.get('website')
-                if website:
-                    add_link("Website", website)
-
-                if provider.get('specialties'):
-                    specialties = ', '.join(provider.get('specialties', []))
-                    add_paragraph(f"Specialties: {specialties}")
-
-        # Speech Providers
-        speech_providers = summary_report.get('speech_providers', [])
-        if speech_providers:
-            add_paragraph("Speech Providers", "HEADING_4")
-            for i, provider in enumerate(speech_providers, 1):
-                add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
-
-                # Rating and reviews
-                rating = provider.get('rating')
-                review_count = provider.get('review_count')
-                if rating is not None:
-                    rating_text = f"Rating: {rating:.1f}/5.0"
-                    if review_count:
-                        rating_text += f" ({review_count} reviews)"
-                    add_paragraph(rating_text)
-
-                # Distance
-                distance = provider.get('distance_miles')
-                if distance is not None:
-                    add_paragraph(f"Distance: {distance:.1f} miles")
-
-                add_paragraph(f"Address: {provider.get('address', 'N/A')}")
-
-                if provider.get('phone'):
-                    add_paragraph(f"Phone: {provider.get('phone')}")
-
-                website = provider.get('website')
-                if website:
-                    add_link("Website", website)
-
-                if provider.get('specialties'):
-                    specialties = ', '.join(provider.get('specialties', []))
-                    add_paragraph(f"Specialties: {specialties}")
-
-        # If undiagnosed, add “Where to obtain an evaluation”
-        diag_status = (patient_info.get('diagnosis_status') or "").strip().lower()
-        if diag_status in ("", "undiagnosed", "unknown", "none"):
-            add_paragraph("Where to Obtain a Diagnostic Evaluation", "HEADING_3")
-            add_paragraph("If you do not yet have an evaluation, here is a place to get started:")
-            add_link("ADG Cares", "https://www.adgcares.com/")
-
-        # Additional Notes
-        notes = summary_report.get('additional_notes', [])
-        if notes:
-            add_paragraph("Additional Notes", "HEADING_4")
-            for note in notes:
-                add_paragraph(f"• {note}")
-            add_paragraph("")
-        
-        # Resources Section
-        add_paragraph("Local Resources", "HEADING_2", page_break_before=True)
-        
-        # Check if resources generation was skipped
-        if resources.get('status') == 'skipped':
-            add_paragraph(f"Resource lookup skipped: {resources.get('reason', 'No reason provided')}")
-        elif resources.get('status') == 'error':
-            add_paragraph(f"Error generating resources: {resources.get('message', 'Unknown error')}")
-        else:
-            # Resources come from ResourceFinderResult: resources['summary_report']
-            summary_report = resources.get('summary_report', {})
-            
-            if summary_report:
-                # Patient location
-                location = summary_report.get('patient_location', {})
-                if location:
-                    add_paragraph(f"Location: {location.get('city', 'N/A')}, {location.get('state', 'N/A')} {location.get('zip_code', 'N/A')}")
-                    # add_paragraph(f"Metropolitan Area: {summary_report.get('metropolitan_status', 'N/A')}")
-                    add_paragraph(f"Search Radius: {summary_report.get('search_radius_miles', 'N/A')} miles")
-                    add_paragraph("")
-                
-                # State Early Intervention Program
                 ei_program = summary_report.get('state_early_intervention_program', {})
                 if ei_program:
                     add_paragraph("State Early Intervention Program", "HEADING_4")
@@ -947,6 +812,7 @@ class GoogleDocsService:
                         add_paragraph(f"Phone: {ei_program.get('contact_phone')}")
                     if ei_program.get('contact_email'):
                         add_paragraph(f"Email: {ei_program.get('contact_email')}")
+                
                 # Pediatricians / Developmental Pediatrics
                 peds = summary_report.get('pediatricians', [])
                 if peds:
@@ -1000,7 +866,7 @@ class GoogleDocsService:
                         if provider.get('specialties'):
                             specialties = ', '.join(provider.get('specialties', []))
                             add_paragraph(f"Specialties: {specialties}")
-                
+
                 # Speech Providers
                 speech_providers = summary_report.get('speech_providers', [])
                 if speech_providers:
@@ -1035,7 +901,7 @@ class GoogleDocsService:
                             specialties = ', '.join(provider.get('specialties', []))
                             add_paragraph(f"Specialties: {specialties}")
                 
-                # If undiagnosed, add “Where to obtain an evaluation”
+                # If undiagnosed, add "Where to obtain an evaluation"
                 diag_status = (patient_info.get('diagnosis_status') or "").strip().lower()
                 if diag_status in ("", "undiagnosed", "unknown", "none"):
                     add_paragraph("Where to Obtain a Diagnostic Evaluation", "HEADING_3")
