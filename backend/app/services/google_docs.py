@@ -95,6 +95,39 @@ class GoogleDocsService:
         )
         return creds
 
+    def move_to_folder(self, file_id: str, destination_folder_id: str) -> None:
+        """
+        Move a Google Drive file to a specified folder.
+        
+        Args:
+            file_id: The ID of the file to move
+            destination_folder_id: The ID of the destination folder
+        """
+        try:
+            # Get the file's current parents
+            file = self.drive_service.files().get(
+                fileId=file_id,
+                fields='parents',
+                supportsAllDrives=True
+            ).execute()
+            
+            previous_parents = ",".join(file.get('parents', []))
+            
+            # Move the file to the new folder
+            self.drive_service.files().update(
+                fileId=file_id,
+                addParents=destination_folder_id,
+                removeParents=previous_parents,
+                fields='id, parents',
+                supportsAllDrives=True
+            ).execute()
+            
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error moving file to folder: {str(e)}"
+            )
+
     def create_patient_report(
         self,
         patient_info: Dict[str, Any],

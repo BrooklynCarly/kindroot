@@ -47,6 +47,7 @@ if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY environment variable not set")
 
 GOOGLE_DRIVE_FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
+ARCHIVE_FOLDER_ID = os.getenv("ARCHIVE_FOLDER_ID")
 
 sheets_service = GoogleSheetsService(spreadsheet_id=SPREADSHEET_ID)
 docs_service = GoogleDocsService()
@@ -191,6 +192,28 @@ def generate_patient_report(
         
         # Build patient-friendly triage report for the Doc
         triage_report = build_patient_report(triage_obj)
+        
+        # Archive previous report if it exists and ARCHIVE_FOLDER_ID is configured
+        if ARCHIVE_FOLDER_ID:
+            try:
+                # Get the current report URL from the sheet
+                report_url_cell = f"{report_url_col}{row}"
+                existing_report_url = sheets_service.get_cell_value(sheet_name, report_url_cell)
+                
+                if existing_report_url and "docs.google.com/document/d/" in existing_report_url:
+                    # Extract document ID from URL
+                    existing_doc_id = existing_report_url.split("/d/")[1].split("/")[0]
+                    logger.info(f"Found existing report {existing_doc_id}, moving to archive folder")
+                    
+                    # Move to archive folder
+                    docs_service.move_to_folder(existing_doc_id, ARCHIVE_FOLDER_ID)
+                    logger.info(f"Successfully archived previous report {existing_doc_id}")
+                else:
+                    logger.info("No existing report found to archive")
+            except Exception as e:
+                logger.warning(f"Failed to archive previous report: {e}. Continuing with new report generation.")
+        else:
+            logger.info("ARCHIVE_FOLDER_ID not configured, skipping archival")
         
         try:
             doc_url = docs_service.create_patient_report(

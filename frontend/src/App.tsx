@@ -36,7 +36,8 @@ function App() {
       }
       
       const data = await response.json()
-      setPatients(data.patients || [])
+      // Reverse the array to show newest records first
+      setPatients((data.patients || []).reverse())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load patients')
       console.error('Error fetching patients:', err)

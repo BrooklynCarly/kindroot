@@ -112,6 +112,9 @@ This starts:
    SESSION_SECRET=generate_random_32char_string
    FRONTEND_URL=http://localhost:3000
    CONSUMER_FRONTEND_URL=http://localhost:3001
+   
+   # Optional: Archive old reports when generating new ones
+   ARCHIVE_FOLDER_ID=your_archive_folder_id
    ```
 
 3. **Place Google credentials:**
