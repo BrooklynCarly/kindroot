@@ -157,26 +157,11 @@ Return JSON matching the ActionableStepsOutput schema.
 - Include implementation_guidance narrative
 - Include 2-4 general_notes
 
-# TABLE-FRIENDLY FORMATTING
-**IMPORTANT**: This output will be displayed in a table with columns:
-- Recommended Approach | Why | Actions | Tracking | Decision Points | Considerations
-
-Keep content CONCISE and TABLE-FRIENDLY:
-- **intervention_name**: Short, clear name (1-5 words)
-- **why_this_may_help**: 1-2 sentences max
-- **addresses_multiple_concerns**: 2-4 concise bullet points
-- **what_others_have_done**: 2-4 short, actionable bullets
-- **what_families_tracked**: 2-4 specific metrics
-- **common_decision_points**: 2-3 clear decision points
-- **considerations**: 2-4 brief points
-- **important_notes**: 1 sentence max (optional)
-
 # TONE
 - Informational and observational, not prescriptive
 - Parent-friendly, non-medical language
 - Emphasize holistic, multi-system thinking
 - Frame as "options to explore" not "what you must do"
-- Keep all text concise for table display
 """
 
 
@@ -488,18 +473,17 @@ class ActionableStepsOutput(BaseModel):
                     "recommended_approaches": [
                         {
                             "intervention_id": "diet_gfcf",
-                            "intervention_name": "Gluten/Casein-Free Diet",
+                            "intervention_name": "Gluten/Casein-free baseline",
                             "category": "Diet",
-                            "why_this_may_help": "May address GI issues and sleep disruption linked to food sensitivities.",
+                            "why_this_may_help": "Several concerns including GI issues and sleep disruption may be linked to food sensitivities. This addresses gut-brain axis dysfunction.",
                             "addresses_multiple_concerns": [
                                 "GI symptoms (constipation, reflux)",
                                 "Sleep fragmentation",
-                                "Behavioral regulation"
+                                "Behavioral dysregulation"
                             ],
                             "what_others_have_done": [
                                 "Replaced breads/pastas with certified gluten-free alternatives",
-                                "Swapped dairy with fortified non-dairy options",
-                                "Read labels carefully for hidden gluten/casein"
+                                "Swapped dairy milk/yogurt with fortified non-dairy options"
                             ],
                             "what_families_tracked": [
                                 "Stool consistency and frequency",
@@ -507,22 +491,21 @@ class ActionableStepsOutput(BaseModel):
                                 "Daytime behavior and focus"
                             ],
                             "common_decision_points": [
-                                "No change after 3-4 weeks → consider GI workup",
-                                "Partial improvement → continue and add omega-3"
+                                "No change after 3-4 weeks → consider additional GI workup",
+                                "Partial improvement → continue and layer in omega-3"
                             ],
                             "considerations": [
-                                "Use certified gluten-free products",
-                                "Ensure fortified alternative milks for nutrition",
-                                "May take 2-4 weeks to see changes"
+                                "Certified gluten-free products",
+                                "Fortified alternative milks with calcium/vitamin D"
                             ],
-                            "important_notes": "Discuss with pediatrician before starting"
+                            "important_notes": "Consult with pediatrician before making dietary changes"
                         }
                     ],
-                    "implementation_guidance": "Start with one foundational approach (typically dietary or sleep). After 2-3 weeks, layer in additional supports based on initial response.",
+                    "implementation_guidance": "Many families start with dietary changes as foundational support. After 2-3 weeks, consider adding targeted supplements based on response.",
                     "general_notes": [
-                        "Discuss all new interventions with your pediatrician",
-                        "Introduce one change at a time to track effects",
-                        "Results vary by child; what works for one may not work for another"
+                        "Always discuss with your pediatrician before starting new interventions",
+                        "Introduce one change at a time when possible to track effects",
+                        "Results vary; what works for one family may not work for another"
                     ],
                     "meta": {
                         "version": "1.0.0",
