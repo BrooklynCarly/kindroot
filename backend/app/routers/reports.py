@@ -67,13 +67,14 @@ def generate_patient_report(
     summary_col: str = "J",
     triage_col: str = "AH",
     hypotheses_col: str = "AI",
+    actionable_steps_col: str = "AN",
     resources_col: str = "AJ",
     report_url_col: str = "AK",
     report_generated_col: str = "AL"
 ):
     """
     Generate a comprehensive patient report as a Google Doc.
-    Always generates fresh triage, hypotheses, and resources data.
+    Always generates fresh triage, hypotheses, actionable steps, and resources data.
     Writes all generated data back to the Google Sheet.
     
     Args:
@@ -158,6 +159,12 @@ def generate_patient_report(
         )
         actionable_steps = actionable_steps_obj.model_dump()
         logger.info(f"Generated {len(actionable_steps.get('recommended_approaches', []))} actionable approaches")
+        
+        # Write actionable steps to sheet
+        actionable_steps_cell = f"{actionable_steps_col}{row}"
+        actionable_steps_str = json.dumps(actionable_steps, separators=(",", ":"))
+        sheets_service.write_to_sheet(f"{sheet_name}!{actionable_steps_cell}", [[actionable_steps_str]])
+        logger.info(f"Actionable steps written to {actionable_steps_cell}")
         
         # Generate resources
         logger.info("Generating resources...")
@@ -253,7 +260,8 @@ def generate_patient_report(
             "row": row,
             "data_written_to_sheet": {
                 "triage_cell": triage_cell,
-                "hypotheses_cell": hypotheses_cell
+                "hypotheses_cell": hypotheses_cell,
+                "actionable_steps_cell": actionable_steps_cell
             }
         }
         

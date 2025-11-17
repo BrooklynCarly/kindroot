@@ -752,10 +752,8 @@ class GoogleDocsService:
                 requests.extend(text_insertions)
                 requests.extend(text_styles)
                 
-                # Update index to account for all text inserted into cells
-                for text_req in text_insertions:
-                    text_added = text_req['insertText']['text']
-                    index += len(text_added)
+                # Note: index was already updated when table was created
+                # Text insertions into cells don't change document size
                 
                 add_paragraph("")
                 add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
