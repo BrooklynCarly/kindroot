@@ -748,12 +748,16 @@ class GoogleDocsService:
                             }
                         })
                 
-                # Add all text insertions first, then styles
-                requests.extend(text_insertions)
-                requests.extend(text_styles)
+                # Add text insertions in REVERSE order (last to first)
+                # This prevents earlier insertions from shifting later cell positions
+                requests.extend(reversed(text_insertions))
+                # Styles must be in reverse order too to match their text
+                requests.extend(reversed(text_styles))
                 
-                # Note: index was already updated when table was created
-                # Text insertions into cells don't change document size
+                # Account for all text added to cells (expands document size)
+                for text_req in text_insertions:
+                    text_added = text_req['insertText']['text']
+                    index += len(text_added)
                 
                 add_paragraph("")
                 add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
