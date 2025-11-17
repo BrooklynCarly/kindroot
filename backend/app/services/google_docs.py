@@ -502,275 +502,31 @@ class GoogleDocsService:
             add_paragraph(impl_guidance)
             add_paragraph("")
         
-        # Recommended approaches as table
+        # Recommended approaches
         approaches = actionable_steps.get('recommended_approaches', [])
         if approaches:
             add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
             add_paragraph("")
-
-            try:
             
-                # Create table: 1 header row + number of approach rows
-                num_rows = len(approaches) + 1
-                num_cols = 6
-                table_start_index = index
-                
-                # Insert the table
-                requests.append({
-                    'insertTable': {
-                        'rows': num_rows,
-                        'columns': num_cols,
-                        'location': {'index': table_start_index}
-                    }
-                })
-                
-                # Table structure: each cell takes 2 indices (content + end marker)
-                # Total size: rows * cols * 2 + 1
-                table_size = num_rows * num_cols * 2 + 1
-                index += table_size
-                
-                # Now populate the table cells
-                # Collect all text insertions and styling separately to avoid index shifting
-                text_insertions = []
-                text_styles = []
-                
-                # Header row
-                headers = [
-                    "Recommended Approach",
-                    "Why",
-                    "Actions",
-                    "Tracking",
-                    "Decision Points",
-                    "Considerations"
-                ]
-                
-                for col_idx, header in enumerate(headers):
-                    # Each cell is at: table_start + 1 + (row * num_cols + col) * 2
-                    # Row 0 is header row
-                    cell_index = table_start_index + 1 + (0 * num_cols + col_idx) * 2
-                    text_insertions.append({
-                        'insertText': {
-                            'location': {'index': cell_index},
-                            'text': header
-                        }
-                    })
-                    # Make header bold and 9pt
-                    text_styles.append({
-                        'updateTextStyle': {
-                            'range': {
-                                'startIndex': cell_index,
-                                'endIndex': cell_index + len(header)
-                            },
-                            'textStyle': {
-                                'bold': True,
-                                'fontSize': {
-                                    'magnitude': 9,
-                                    'unit': 'PT'
-                                }
-                            },
-                            'fields': 'bold,fontSize'
-                        }
-                    })
-                
-                # Data rows
-                for row_idx, intervention in enumerate(approaches, start=1):
-                    # Each cell is at: table_start + 1 + (row * num_cols + col) * 2
-                    
-                    # Column 0: Recommended Approach (name + category)
-                    approach_text = intervention.get('intervention_name', 'Unknown')
-                    category = intervention.get('category')
-                    if category:
-                        approach_text += f"\n({category})"
-                    cell_idx_0 = table_start_index + 1 + (row_idx * num_cols + 0) * 2
-                    text_insertions.append({
-                        'insertText': {
-                            'location': {'index': cell_idx_0},
-                            'text': approach_text
-                        }
-                    })
-                    text_styles.append({
-                        'updateTextStyle': {
-                            'range': {
-                                'startIndex': cell_idx_0,
-                                'endIndex': cell_idx_0 + len(approach_text)
-                            },
-                            'textStyle': {
-                                'fontSize': {
-                                    'magnitude': 9,
-                                    'unit': 'PT'
-                                }
-                            },
-                            'fields': 'fontSize'
-                        }
-                    })
-                    
-                    # Column 1: Why (why_this_may_help + addresses_multiple_concerns)
-                    why_text = intervention.get('why_this_may_help', '')
-                    concerns = intervention.get('addresses_multiple_concerns', [])
-                    if concerns:
-                        if why_text:
-                            why_text += "\n\n"
-                        why_text += "May help with:\n" + "\n".join([f"• {c}" for c in concerns])
-                    cell_idx_1 = table_start_index + 1 + (row_idx * num_cols + 1) * 2
-                    if why_text:
-                        text_insertions.append({
-                            'insertText': {
-                                'location': {'index': cell_idx_1},
-                                'text': why_text
-                            }
-                        })
-                        text_styles.append({
-                            'updateTextStyle': {
-                                'range': {
-                                    'startIndex': cell_idx_1,
-                                    'endIndex': cell_idx_1 + len(why_text)
-                                },
-                                'textStyle': {
-                                    'fontSize': {
-                                        'magnitude': 9,
-                                        'unit': 'PT'
-                                    }
-                                },
-                                'fields': 'fontSize'
-                            }
-                        })
-                    
-                    # Column 2: Actions (what_others_have_done)
-                    what_done = intervention.get('what_others_have_done', [])
-                    actions_text = "\n".join([f"• {w}" for w in what_done]) if what_done else ""
-                    cell_idx_2 = table_start_index + 1 + (row_idx * num_cols + 2) * 2
-                    if actions_text:
-                        text_insertions.append({
-                            'insertText': {
-                                'location': {'index': cell_idx_2},
-                                'text': actions_text
-                            }
-                        })
-                        text_styles.append({
-                            'updateTextStyle': {
-                                'range': {
-                                    'startIndex': cell_idx_2,
-                                    'endIndex': cell_idx_2 + len(actions_text)
-                                },
-                                'textStyle': {
-                                    'fontSize': {
-                                        'magnitude': 9,
-                                        'unit': 'PT'
-                                    }
-                                },
-                                'fields': 'fontSize'
-                            }
-                        })
-                    
-                    # Column 3: Tracking (what_families_tracked)
-                    tracked = intervention.get('what_families_tracked', [])
-                    tracking_text = "\n".join([f"• {t}" for t in tracked]) if tracked else ""
-                    cell_idx_3 = table_start_index + 1 + (row_idx * num_cols + 3) * 2
-                    if tracking_text:
-                        text_insertions.append({
-                            'insertText': {
-                                'location': {'index': cell_idx_3},
-                                'text': tracking_text
-                            }
-                        })
-                        text_styles.append({
-                            'updateTextStyle': {
-                                'range': {
-                                    'startIndex': cell_idx_3,
-                                    'endIndex': cell_idx_3 + len(tracking_text)
-                                },
-                                'textStyle': {
-                                    'fontSize': {
-                                        'magnitude': 9,
-                                        'unit': 'PT'
-                                    }
-                                },
-                                'fields': 'fontSize'
-                            }
-                        })
-                    
-                    # Column 4: Decision Points (common_decision_points)
-                    decision_points = intervention.get('common_decision_points', [])
-                    decisions_text = "\n".join([f"• {d}" for d in decision_points]) if decision_points else ""
-                    cell_idx_4 = table_start_index + 1 + (row_idx * num_cols + 4) * 2
-                    if decisions_text:
-                        text_insertions.append({
-                            'insertText': {
-                                'location': {'index': cell_idx_4},
-                                'text': decisions_text
-                            }
-                        })
-                        text_styles.append({
-                            'updateTextStyle': {
-                                'range': {
-                                    'startIndex': cell_idx_4,
-                                    'endIndex': cell_idx_4 + len(decisions_text)
-                                },
-                                'textStyle': {
-                                    'fontSize': {
-                                        'magnitude': 9,
-                                        'unit': 'PT'
-                                    }
-                                },
-                                'fields': 'fontSize'
-                            }
-                        })
-                    
-                    # Column 5: Considerations
-                    considerations = intervention.get('considerations', [])
-                    notes = intervention.get('important_notes')
-                    considerations_text = "\n".join([f"• {c}" for c in considerations]) if considerations else ""
-                    if notes:
-                        if considerations_text:
-                            considerations_text += "\n\n"
-                        considerations_text += f"Note: {notes}"
-                    cell_idx_5 = table_start_index + 1 + (row_idx * num_cols + 5) * 2
-                    if considerations_text:
-                        text_insertions.append({
-                            'insertText': {
-                                'location': {'index': cell_idx_5},
-                                'text': considerations_text
-                            }
-                        })
-                        text_styles.append({
-                            'updateTextStyle': {
-                                'range': {
-                                    'startIndex': cell_idx_5,
-                                    'endIndex': cell_idx_5 + len(considerations_text)
-                                },
-                                'textStyle': {
-                                    'fontSize': {
-                                        'magnitude': 9,
-                                        'unit': 'PT'
-                                    }
-                                },
-                                'fields': 'fontSize'
-                            }
-                        })
-                
-                # Add text insertions in REVERSE order (last to first)
-                # This prevents earlier insertions from shifting later cell positions
-                requests.extend(reversed(text_insertions))
-                # Styles must be in reverse order too to match their text
-                requests.extend(reversed(text_styles))
-                
-                # Do NOT update index - table size was already calculated and accounted for
-                # Text insertions into cells happen within the pre-allocated table space
-                
+            # Use text format (table disabled due to index tracking issues)
+            for i, intervention in enumerate(approaches, 1):
+                add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
+                why_help = intervention.get('why_this_may_help')
+                if why_help:
+                    add_paragraph(f"Why this may help: {why_help}")
+                concerns = intervention.get('addresses_multiple_concerns', [])
+                if concerns:
+                    add_paragraph("May help with: " + ", ".join(concerns))
+                what_done = intervention.get('what_others_have_done', [])
+                if what_done:
+                    add_paragraph("What others have done:")
+                    for action in what_done:
+                        add_paragraph(f"  • {action}")
                 add_paragraph("")
-                add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
-                add_paragraph("")
-            except Exception as e:
-                # If table creation fails, fall back to text format
-                import logging
-                logging.error(f"Failed to create actionable steps table: {e}")
-                add_paragraph("Recommended Approaches (text format):")
-                for i, intervention in enumerate(approaches, 1):
-                    add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
-                    why_help = intervention.get('why_this_may_help')
-                    if why_help:
-                        add_paragraph(f"Why: {why_help}")
-                    add_paragraph("")
+            
+            add_paragraph("")
+            add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
+            add_paragraph("")
         
         # General notes
         general_notes = actionable_steps.get('general_notes', [])
