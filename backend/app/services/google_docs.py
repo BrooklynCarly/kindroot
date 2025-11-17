@@ -754,11 +754,8 @@ class GoogleDocsService:
                 # Styles must be in reverse order too to match their text
                 requests.extend(reversed(text_styles))
                 
-                # Account for text added to cells (expands document size)
-                # Each cell has 1 char initially, so inserting N chars adds N-1 chars
-                for text_req in text_insertions:
-                    text_added = text_req['insertText']['text']
-                    index += len(text_added) - 1
+                # Do NOT update index - table size was already calculated and accounted for
+                # Text insertions into cells happen within the pre-allocated table space
                 
                 add_paragraph("")
                 add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
