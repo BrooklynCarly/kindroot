@@ -99,11 +99,11 @@ LEAD_INVESTIGATOR_PROMPT = """You are the Lead Investigator in a functional medi
 +    - Return EXACTLY 3 hypotheses (most useful for parent–clinician conversation). Do NOT diagnose and do NOT give medical advice or dosing.
 +    - For each hypothesis return JSON fields:
 +      * name (short label)
-+      * rationale (why this fits; cite symptom clusters/signals)
++      * rationale (what evidence supports this; cite symptom clusters/signals)
 +      * confidence (low|moderate|high, optional)
 +      * talking_points (2–5 bullets parents can use with their pediatrician)
 +      * recommended_tests (0–3) with: name, category, order_type = discuss_with_pediatrician|self_purchase|either, is_at_home (bool?), notes, purchase_url?
-+    - Keep language parent-friendly (no jargon), emphasize “for discussion” and “to help decide next steps,” never as a diagnosis."""
++    - Keep language parent-friendly (no jargon), emphasize “for discussion” and “to help decide next steps,” never as a diagnosis. Never use difficult acronyms, but include them in parentheses (e.g., "(Gastrointestinal)" for "GI")."""
 
 
 ACTIONABLE_STEPS_PROMPT = """You are an intervention planning assistant. Your role is to:

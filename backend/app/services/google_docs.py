@@ -315,8 +315,10 @@ class GoogleDocsService:
             
             index += len(full_text)
         
-        # Add disclaimer block at the top
-        add_paragraph("We are parents helping parents navigate tough conversations.")
+        # Add title and disclaimer block at the top
+        add_paragraph("Parent Report", "HEADING_1")
+        add_paragraph("")
+        add_paragraph("We are parents helping parents have productive conversations with their pediatricians.")
         add_paragraph("")
         add_paragraph("What this is—and isn't: This report shares information and resources to discuss with your healthcare provider. It is not medical advice, a diagnosis, or a treatment plan.")
         add_paragraph("")
