@@ -516,11 +516,12 @@ class GoogleDocsService:
                 why_help = intervention.get('why_this_may_help')
                 if why_help:
                     add_paragraph(f"Why this may help: {why_help}")
-                
+                    add_paragraph("")
                 # Addresses multiple concerns
                 concerns = intervention.get('addresses_multiple_concerns', [])
                 if concerns:
                     add_paragraph("May help with: " + ", ".join(concerns))
+                    add_paragraph("")
                 
                 # What others have done
                 what_done = intervention.get('what_others_have_done', [])
@@ -528,13 +529,15 @@ class GoogleDocsService:
                     add_paragraph("What others have done:")
                     for action in what_done:
                         add_paragraph(f"  • {action}")
-                
+                    add_paragraph("")
+                    
                 # What families tracked
                 tracked = intervention.get('what_families_tracked', [])
                 if tracked:
                     add_paragraph("What families tracked:")
                     for item in tracked:
                         add_paragraph(f"  • {item}")
+                    add_paragraph("")
                 
                 # Common decision points
                 decision_points = intervention.get('common_decision_points', [])
@@ -542,6 +545,7 @@ class GoogleDocsService:
                     add_paragraph("Common decision points:")
                     for point in decision_points:
                         add_paragraph(f"  • {point}")
+                    add_paragraph("")
                 
                 # Considerations
                 considerations = intervention.get('considerations', [])
@@ -549,6 +553,7 @@ class GoogleDocsService:
                     add_paragraph("Considerations:")
                     for consideration in considerations:
                         add_paragraph(f"  • {consideration}")
+                    add_paragraph("")
                 
                 # Important notes
                 notes = intervention.get('important_notes')
