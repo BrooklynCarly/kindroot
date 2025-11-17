@@ -752,20 +752,25 @@ class GoogleDocsService:
                 requests.extend(text_insertions)
                 requests.extend(text_styles)
                 
+                # Update index to account for all text inserted into cells
+                for text_req in text_insertions:
+                    text_added = text_req['insertText']['text']
+                    index += len(text_added)
+                
                 add_paragraph("")
                 add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
                 add_paragraph("")
             except Exception as e:
-            # If table creation fails, fall back to text format
+                # If table creation fails, fall back to text format
                 import logging
-            logging.error(f"Failed to create actionable steps table: {e}")
-            add_paragraph("Recommended Approaches (text format):")
-            for i, intervention in enumerate(approaches, 1):
-                add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
-                why_help = intervention.get('why_this_may_help')
-                if why_help:
-                    add_paragraph(f"Why: {why_help}")
-                add_paragraph("")
+                logging.error(f"Failed to create actionable steps table: {e}")
+                add_paragraph("Recommended Approaches (text format):")
+                for i, intervention in enumerate(approaches, 1):
+                    add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
+                    why_help = intervention.get('why_this_may_help')
+                    if why_help:
+                        add_paragraph(f"Why: {why_help}")
+                    add_paragraph("")
         
         # General notes
         general_notes = actionable_steps.get('general_notes', [])
@@ -907,9 +912,6 @@ class GoogleDocsService:
         if notes:
             add_paragraph("Additional Notes", "HEADING_4")
             for note in notes:
-        if general_notes:
-            add_paragraph("Important Reminders", "HEADING_3")
-            for note in general_notes:
                 add_paragraph(f"• {note}")
             add_paragraph("")
         
