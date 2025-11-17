@@ -554,12 +554,6 @@ class GoogleDocsService:
                     for consideration in considerations:
                         add_paragraph(f"  • {consideration}")
                     add_paragraph("")
-                
-                # Important notes
-                notes = intervention.get('important_notes')
-                if notes:
-                    add_paragraph(f"Important: {notes}")
-                add_paragraph("")
         
         # General notes
         general_notes = actionable_steps.get('general_notes', [])
