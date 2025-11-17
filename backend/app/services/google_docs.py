@@ -719,9 +719,82 @@ class GoogleDocsService:
                 notes = intervention.get('important_notes')
                 considerations_text = "\n".join([f"• {c}" for c in considerations]) if considerations else ""
                 if notes:
+                    if considerations_text:
+                        considerations_text += "\n\n"
+                    considerations_text += f"Note: {notes}"
+                cell_idx_5 = table_start_index + 1 + (row_idx * num_cols + 5) * 2
+                if considerations_text:
+                    text_insertions.append({
+                        'insertText': {
+                            'location': {'index': cell_idx_5},
+                            'text': considerations_text
+                        }
+                    })
+                    text_styles.append({
+                        'updateTextStyle': {
+                            'range': {
+                                'startIndex': cell_idx_5,
+                                'endIndex': cell_idx_5 + len(considerations_text)
+                            },
+                            'textStyle': {
+                                'fontSize': {
+                                    'magnitude': 9,
+                                    'unit': 'PT'
+                                }
+                            },
+                            'fields': 'fontSize'
+                        }
+                    })
+            
+            # Add all text insertions first, then styles
+            requests.extend(text_insertions)
+            requests.extend(text_styles)
+            
             add_paragraph("")
-
-        # State Early Intervention Program
+            add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
+            add_paragraph("")
+            except Exception as e:
+                # If table creation fails, fall back to text format
+                import logging
+                logging.error(f"Failed to create actionable steps table: {e}")
+                add_paragraph("Recommended Approaches (text format):")
+                for i, intervention in enumerate(approaches, 1):
+                    add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
+                    why_help = intervention.get('why_this_may_help')
+                    if why_help:
+                        add_paragraph(f"Why: {why_help}")
+                    add_paragraph("")
+        
+        # General notes
+        general_notes = actionable_steps.get('general_notes', [])
+        if general_notes:
+            add_paragraph("Important Reminders", "HEADING_3")
+            for note in general_notes:
+                add_paragraph(f"• {note}")
+            add_paragraph("")
+        
+        # Resources Section
+        add_paragraph("Local Resources", "HEADING_2", page_break_before=True)
+        
+        # Check if resources generation was skipped
+        if resources.get('status') == 'skipped':
+            add_paragraph(f"Resource lookup skipped: {resources.get('reason', 'No reason provided')}")
+        elif resources.get('status') == 'error':
+            add_paragraph(f"Error generating resources: {resources.get('message', 'Unknown error')}")
+        else:
+            # Resources come from ResourceFinderResult: resources['summary_report']
+            summary_report = resources.get('summary_report', {})
+            
+            if summary_report:
+                # Patient location
+                location = summary_report.get('patient_location', {})
+                if location:
+                    add_paragraph(f"Location: {location.get('city', 'N/A')}, {location.get('state', 'N/A')} {location.get('zip_code', 'N/A')}")
+                    # add_paragraph(f"Metropolitan Area: {summary_report.get('metropolitan_status', 'N/A')}")
+                    add_paragraph(f"Search Radius: {summary_report.get('search_radius_miles', 'N/A')} miles")
+                    add_paragraph("")
+                
+                # State Early Intervention Program
         ei_program = summary_report.get('state_early_intervention_program', {})
         if ei_program:
             add_paragraph("State Early Intervention Program", "HEADING_4")
