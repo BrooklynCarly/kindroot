@@ -539,14 +539,16 @@ class GoogleDocsService:
             ]
             
             for col_idx, header in enumerate(headers):
-                cell_index = table_start_index + 1 + (col_idx * 2)
+                # Each cell is at: table_start + 1 + (row * num_cols + col) * 2
+                # Row 0 is header row
+                cell_index = table_start_index + 1 + (0 * num_cols + col_idx) * 2
                 requests.append({
                     'insertText': {
                         'location': {'index': cell_index},
                         'text': header
                     }
                 })
-                # Make header bold
+                # Make header bold and 9pt
                 requests.append({
                     'updateTextStyle': {
                         'range': {
@@ -554,27 +556,46 @@ class GoogleDocsService:
                             'endIndex': cell_index + len(header)
                         },
                         'textStyle': {
-                            'bold': True
+                            'bold': True,
+                            'fontSize': {
+                                'magnitude': 9,
+                                'unit': 'PT'
+                            }
                         },
-                        'fields': 'bold'
+                        'fields': 'bold,fontSize'
                     }
                 })
             
             # Data rows
             for row_idx, intervention in enumerate(approaches, start=1):
-                # Calculate base index for this row
-                row_base = table_start_index + 1 + (row_idx * num_cols * 2)
+                # Each cell is at: table_start + 1 + (row * num_cols + col) * 2
                 
                 # Column 0: Recommended Approach (name + category)
                 approach_text = intervention.get('intervention_name', 'Unknown')
                 category = intervention.get('category')
                 if category:
                     approach_text += f"\n({category})"
-                cell_idx_0 = row_base
+                cell_idx_0 = table_start_index + 1 + (row_idx * num_cols + 0) * 2
                 requests.append({
                     'insertText': {
                         'location': {'index': cell_idx_0},
                         'text': approach_text
+                    }
+                })
+                # Set font size to 9pt
+                requests.append({
+                    'updateTextStyle': {
+                        'range': {
+                            'startIndex': cell_idx_0,
+                            'endIndex': cell_idx_0 + len(approach_text)
+                        },
+                        'textStyle': {
+                            'fontSize': {
+                                'magnitude': 9,
+                                'unit': 'PT'
+                            }
+                        },
+                        'fields': 'fontSize'
                     }
                 })
                 
@@ -585,7 +606,7 @@ class GoogleDocsService:
                     if why_text:
                         why_text += "\n\n"
                     why_text += "May help with:\n" + "\n".join([f"• {c}" for c in concerns])
-                cell_idx_1 = row_base + 2
+                cell_idx_1 = table_start_index + 1 + (row_idx * num_cols + 1) * 2
                 if why_text:
                     requests.append({
                         'insertText': {
@@ -593,11 +614,27 @@ class GoogleDocsService:
                             'text': why_text
                         }
                     })
+                    # Set font size to 9pt
+                    requests.append({
+                        'updateTextStyle': {
+                            'range': {
+                                'startIndex': cell_idx_1,
+                                'endIndex': cell_idx_1 + len(why_text)
+                            },
+                            'textStyle': {
+                                'fontSize': {
+                                    'magnitude': 9,
+                                    'unit': 'PT'
+                                }
+                            },
+                            'fields': 'fontSize'
+                        }
+                    })
                 
                 # Column 2: Actions (what_others_have_done)
                 what_done = intervention.get('what_others_have_done', [])
                 actions_text = "\n".join([f"• {w}" for w in what_done]) if what_done else ""
-                cell_idx_2 = row_base + 4
+                cell_idx_2 = table_start_index + 1 + (row_idx * num_cols + 2) * 2
                 if actions_text:
                     requests.append({
                         'insertText': {
@@ -605,11 +642,27 @@ class GoogleDocsService:
                             'text': actions_text
                         }
                     })
+                    # Set font size to 9pt
+                    requests.append({
+                        'updateTextStyle': {
+                            'range': {
+                                'startIndex': cell_idx_2,
+                                'endIndex': cell_idx_2 + len(actions_text)
+                            },
+                            'textStyle': {
+                                'fontSize': {
+                                    'magnitude': 9,
+                                    'unit': 'PT'
+                                }
+                            },
+                            'fields': 'fontSize'
+                        }
+                    })
                 
                 # Column 3: Tracking (what_families_tracked)
                 tracked = intervention.get('what_families_tracked', [])
                 tracking_text = "\n".join([f"• {t}" for t in tracked]) if tracked else ""
-                cell_idx_3 = row_base + 6
+                cell_idx_3 = table_start_index + 1 + (row_idx * num_cols + 3) * 2
                 if tracking_text:
                     requests.append({
                         'insertText': {
@@ -617,16 +670,48 @@ class GoogleDocsService:
                             'text': tracking_text
                         }
                     })
+                    # Set font size to 9pt
+                    requests.append({
+                        'updateTextStyle': {
+                            'range': {
+                                'startIndex': cell_idx_3,
+                                'endIndex': cell_idx_3 + len(tracking_text)
+                            },
+                            'textStyle': {
+                                'fontSize': {
+                                    'magnitude': 9,
+                                    'unit': 'PT'
+                                }
+                            },
+                            'fields': 'fontSize'
+                        }
+                    })
                 
                 # Column 4: Decision Points (common_decision_points)
                 decision_points = intervention.get('common_decision_points', [])
                 decisions_text = "\n".join([f"• {d}" for d in decision_points]) if decision_points else ""
-                cell_idx_4 = row_base + 8
+                cell_idx_4 = table_start_index + 1 + (row_idx * num_cols + 4) * 2
                 if decisions_text:
                     requests.append({
                         'insertText': {
                             'location': {'index': cell_idx_4},
                             'text': decisions_text
+                        }
+                    })
+                    # Set font size to 9pt
+                    requests.append({
+                        'updateTextStyle': {
+                            'range': {
+                                'startIndex': cell_idx_4,
+                                'endIndex': cell_idx_4 + len(decisions_text)
+                            },
+                            'textStyle': {
+                                'fontSize': {
+                                    'magnitude': 9,
+                                    'unit': 'PT'
+                                }
+                            },
+                            'fields': 'fontSize'
                         }
                     })
                 
@@ -638,12 +723,28 @@ class GoogleDocsService:
                     if considerations_text:
                         considerations_text += "\n\n"
                     considerations_text += f"Note: {notes}"
-                cell_idx_5 = row_base + 10
+                cell_idx_5 = table_start_index + 1 + (row_idx * num_cols + 5) * 2
                 if considerations_text:
                     requests.append({
                         'insertText': {
                             'location': {'index': cell_idx_5},
                             'text': considerations_text
+                        }
+                    })
+                    # Set font size to 9pt
+                    requests.append({
+                        'updateTextStyle': {
+                            'range': {
+                                'startIndex': cell_idx_5,
+                                'endIndex': cell_idx_5 + len(considerations_text)
+                            },
+                            'textStyle': {
+                                'fontSize': {
+                                    'magnitude': 9,
+                                    'unit': 'PT'
+                                }
+                            },
+                            'fields': 'fontSize'
                         }
                     })
             
