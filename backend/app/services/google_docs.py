@@ -39,36 +39,59 @@ class GoogleDocsService:
         Build credentials based on DOCS_AUTH_MODE environment variable.
         - If DOCS_AUTH_MODE=oauth: use InstalledAppFlow (user account)
         - Else: use Service Account credentials
+        
+        Gracefully handles OAuth token expiration by falling back to service account.
         """
         auth_mode = os.getenv("DOCS_AUTH_MODE", "service").lower()
         if auth_mode == "oauth":
-            # OAuth user flow
-            creds: Credentials | None = None
-            if OAUTH_TOKEN_FILE.exists():
-                try:
-                    creds = Credentials.from_authorized_user_file(str(OAUTH_TOKEN_FILE), SCOPES)
-                except Exception:
-                    creds = None
-            if not creds or not creds.valid:
-                if creds and creds.expired and creds.refresh_token:
+            # OAuth user flow - try to use it, but fall back if it fails
+            try:
+                creds: Credentials | None = None
+                if OAUTH_TOKEN_FILE.exists():
                     try:
-                        creds.refresh(Request())
+                        creds = Credentials.from_authorized_user_file(str(OAUTH_TOKEN_FILE), SCOPES)
                     except Exception as e:
-                        raise HTTPException(status_code=500, detail=f"Failed to refresh OAuth token: {e}")
-                else:
-                    if not OAUTH_CLIENT_SECRETS.exists():
-                        raise FileNotFoundError(
-                            f"OAuth client secrets not found at {OAUTH_CLIENT_SECRETS}. Set GOOGLE_OAUTH_CLIENT_SECRETS or place client_secret.json in backend/."
-                        )
-                    flow = InstalledAppFlow.from_client_secrets_file(str(OAUTH_CLIENT_SECRETS), SCOPES)
-                    creds = flow.run_local_server(port=0)
-                # Save the credentials for the next run
-                try:
-                    with open(OAUTH_TOKEN_FILE, 'w') as token:
-                        token.write(creds.to_json())
-                except Exception:
-                    pass
-            return creds
+                        print(f"Warning: Could not load OAuth token file: {e}")
+                        creds = None
+                
+                if not creds or not creds.valid:
+                    if creds and creds.expired and creds.refresh_token:
+                        try:
+                            creds.refresh(Request())
+                            # Save refreshed token
+                            with open(OAUTH_TOKEN_FILE, 'w') as token:
+                                token.write(creds.to_json())
+                        except Exception as e:
+                            print(f"⚠️  OAuth token expired or revoked: {e}")
+                            print(f"💡 Falling back to service account mode.")
+                            print(f"💡 To re-authenticate OAuth, delete {OAUTH_TOKEN_FILE} and set DOCS_AUTH_MODE=oauth")
+                            # Fall through to service account mode below
+                            creds = None
+                    else:
+                        if not OAUTH_CLIENT_SECRETS.exists():
+                            print(f"Warning: OAuth client secrets not found at {OAUTH_CLIENT_SECRETS}")
+                            print(f"Falling back to service account mode.")
+                            creds = None
+                        else:
+                            flow = InstalledAppFlow.from_client_secrets_file(str(OAUTH_CLIENT_SECRETS), SCOPES)
+                            creds = flow.run_local_server(port=0)
+                            # Save the credentials for the next run
+                            try:
+                                with open(OAUTH_TOKEN_FILE, 'w') as token:
+                                    token.write(creds.to_json())
+                            except Exception:
+                                pass
+                
+                # If we successfully got OAuth creds, return them
+                if creds and creds.valid:
+                    return creds
+                
+                # Otherwise fall through to service account
+                print("ℹ️  Using service account for Google Docs API")
+                
+            except Exception as e:
+                print(f"⚠️  OAuth authentication failed: {e}")
+                print(f"💡 Falling back to service account mode.")
         # Default: service account
         # Try to get credentials from environment variable first (production)
         credentials_base64 = os.getenv("GOOGLE_CREDENTIALS_BASE64")
