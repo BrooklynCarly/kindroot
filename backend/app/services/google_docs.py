@@ -371,19 +371,47 @@ class GoogleDocsService:
         add_paragraph("What Others Have Tried", "HEADING_2", page_break_before=True)
         add_paragraph("Based on the patterns identified above, here are approaches other families with similar situations have explored. This information is for discussion with your pediatrician—not medical advice. Always consult your care team before making changes.")
         
-        # --- Intervention Tables (Structure Only) ---
+        # --- Intervention Approaches ---
         approaches = actionable_steps.get('recommended_approaches', [])
         if approaches:
             for i, intervention in enumerate(approaches, 1):
                 add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
-                table_start_index = index
-                requests.append({'insertTable': {'rows': 6, 'columns': 2, 'location': {'index': table_start_index}}})
-                table_locations.append({'start_index': table_start_index, 'intervention': intervention})
-                # After inserting a table, the cursor is inside the first cell.
-                # The document's length has increased, so we must update the index
-                # to ensure subsequent content is placed after the table.
-                # A 6x2 table adds (6*2*2) + 1 = 25 characters.
-                index += 25
+                
+                # Why This May Help
+                if intervention.get('why_this_may_help'):
+                    add_paragraph(f"Why This May Help: {intervention['why_this_may_help']}")
+                
+                # What Others Have Done
+                what_others = intervention.get('what_others_have_done') or []
+                if what_others:
+                    add_paragraph("What Others Did:")
+                    for item in what_others:
+                        add_paragraph(f"• {item}")
+                
+                # What Families Tracked
+                what_tracked = intervention.get('what_families_tracked') or []
+                if what_tracked:
+                    add_paragraph("What Families Tracked:")
+                    for item in what_tracked:
+                        add_paragraph(f"• {item}")
+                
+                # Decision Points
+                decision_points = intervention.get('common_decision_points') or []
+                if decision_points:
+                    add_paragraph("Decision Points:")
+                    for item in decision_points:
+                        add_paragraph(f"• {item}")
+                
+                # Considerations
+                considerations = intervention.get('considerations') or []
+                if considerations:
+                    add_paragraph("Considerations:")
+                    for item in considerations:
+                        add_paragraph(f"• {item}")
+                
+                # Notes
+                add_paragraph("Notes: Review with your healthcare provider")
+                add_paragraph("")  # Blank line between interventions
 
         # --- General Notes ---
         general_notes = actionable_steps.get('general_notes') or []
