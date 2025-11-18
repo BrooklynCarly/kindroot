@@ -372,11 +372,10 @@ class GoogleDocsService:
                     content_cell_index = table_start_index + 6 + (row * 4)
                     requests.append({'insertText': {'location': {'index': content_cell_index}, 'text': contents[row]}})
                 
-                # Manually advance index past the table. This is an approximation.
-                # A table with R rows and C columns takes up (R*C*2) + 1 characters.
-                # Our 6x2 table is (6*2*2)+1 = 25 characters.
-                index += 25
-                add_paragraph("") # Space after table
+                # The table takes up space. A newline is needed to exit the table
+                # structure so that subsequent insertions are outside of it.
+                requests.append({'insertText': {'location': {'index': index + 1}, 'text': '\n'}})
+                index += (6 * 2 * 2) + 2 # Advance index past table and newline
 
         # --- General Notes --- #
         general_notes = actionable_steps.get('general_notes') or []
