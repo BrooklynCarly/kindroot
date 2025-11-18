@@ -306,7 +306,7 @@ class GoogleDocsService:
         add_paragraph(f"Child's Age: {patient_info.get('patient_age', 'N/A')}")
         add_paragraph(f"Sex: {patient_info.get('patient_sex', 'N/A')}")
         add_paragraph(f"Diagnosis Status: {patient_info.get('diagnosis_status', 'N/A')}")
-        top_priorities = patient_info.get('top_family_priorities', [])
+        top_priorities = patient_info.get('top_family_priorities') or []
         if top_priorities:
             add_paragraph("")
             add_paragraph("Top Family Priorities:")
@@ -319,12 +319,15 @@ class GoogleDocsService:
             for i, hyp in enumerate(hypotheses_list[:3], 1):
                 add_paragraph(f"{i}. {hyp.get('name', 'Unknown')}", "HEADING_3")
                 add_paragraph(f"Why this might fit (evidence): {hyp.get('rationale', 'N/A')}")
-                if hyp.get('talking_points'):
+                talking_points = hyp.get('talking_points') or []
+                if talking_points:
                     add_paragraph("Talking points for your pediatrician", "HEADING_4")
-                    for tp in hyp['talking_points']: add_paragraph(f"• {tp}")
-                if hyp.get('recommended_tests'):
+                    for tp in talking_points: add_paragraph(f"• {tp}")
+                
+                recommended_tests = hyp.get('recommended_tests') or []
+                if recommended_tests:
                     add_paragraph("Recommended tests to discuss or consider", "HEADING_4")
-                    for t in hyp['recommended_tests']:
+                    for t in recommended_tests:
                         line = f"• {t.get('name', 'Test')}"
                         if t.get('category'): line += f" — {t['category']}"
                         if t.get('order_type') == 'self_purchase': line += " (at-home or self-purchase)"
@@ -351,10 +354,10 @@ class GoogleDocsService:
                 # Prepare content
                 contents = [
                     intervention.get('why_this_may_help', 'N/A'),
-                    '\n'.join(f"• {item}" for item in intervention.get('what_others_have_done', [])) or 'N/A',
-                    '\n'.join(f"• {item}" for item in intervention.get('what_families_tracked', [])) or 'N/A',
-                    '\n'.join(f"• {item}" for item in intervention.get('common_decision_points', [])) or 'N/A',
-                    '\n'.join(f"• {item}" for item in intervention.get('considerations', [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in (intervention.get('what_others_have_done') or [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in (intervention.get('what_families_tracked') or [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in (intervention.get('common_decision_points') or [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in (intervention.get('considerations') or [])) or 'N/A',
                     "Review with your healthcare provider"
                 ]
 
@@ -376,7 +379,7 @@ class GoogleDocsService:
                 add_paragraph("") # Space after table
 
         # --- General Notes --- #
-        general_notes = actionable_steps.get('general_notes', [])
+        general_notes = actionable_steps.get('general_notes') or []
         if general_notes:
             add_paragraph("Important Reminders", "HEADING_3")
             for note in general_notes: add_paragraph(f"• {note}")
