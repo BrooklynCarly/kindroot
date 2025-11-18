@@ -510,7 +510,7 @@ class GoogleDocsService:
             
             # Create table: 1 header row + N data rows, 7 columns
             num_rows = len(approaches) + 1
-            num_cols = 7
+            num_cols = 6
             table_start_index = index
             
             # Insert the table
