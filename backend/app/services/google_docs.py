@@ -508,52 +508,177 @@ class GoogleDocsService:
             add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
             add_paragraph("")
             
-            # Use text format (table disabled due to index tracking issues)
-            for i, intervention in enumerate(approaches, 1):
-                add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
+            # Create table for approaches
+            num_rows = len(approaches) + 1  # +1 for header row
+            num_cols = 7
+            table_start_index = index
+            
+            # Insert the table
+            requests.append({
+                'insertTable': {
+                    'rows': num_rows,
+                    'columns': num_cols,
+                    'location': {'index': table_start_index}
+                }
+            })
+            
+            # Table structure: each cell takes 2 indices (content + end marker)
+            # Total table size = (rows * cols * 2) + 1 (for table end)
+            table_size = (num_rows * num_cols * 2) + 1
+            index += table_size
+            
+            # Prepare all cell content insertions (we'll add them in reverse order)
+            cell_updates = []
+            
+            # Helper function to get cell index
+            def get_cell_index(row, col):
+                return table_start_index + 1 + (row * num_cols + col) * 2
+            
+            # Header row (row 0)
+            headers = [
+                "Intervention",
+                "Why Help",
+                "Concerns",
+                "What Done",
+                "Tracked",
+                "Decision Points",
+                "Considerations"
+            ]
+            
+            for col_idx, header_text in enumerate(headers):
+                cell_idx = get_cell_index(0, col_idx)
+                cell_updates.append({
+                    'insertText': {
+                        'location': {'index': cell_idx},
+                        'text': header_text
+                    }
+                })
+                # Style header as bold
+                cell_updates.append({
+                    'updateTextStyle': {
+                        'range': {
+                            'startIndex': cell_idx,
+                            'endIndex': cell_idx + len(header_text)
+                        },
+                        'textStyle': {
+                            'bold': True,
+                            'fontSize': {'magnitude': 10, 'unit': 'PT'}
+                        },
+                        'fields': 'bold,fontSize'
+                    }
+                })
+            
+            # Data rows
+            for row_idx, intervention in enumerate(approaches, start=1):
+                # Column 0: Intervention name
+                intervention_name = intervention.get('intervention_name', 'Unknown')
+                cell_idx = get_cell_index(row_idx, 0)
+                cell_updates.append({
+                    'insertText': {
+                        'location': {'index': cell_idx},
+                        'text': intervention_name
+                    }
+                })
                 
-                # Why this may help
-                why_help = intervention.get('why_this_may_help')
+                # Column 1: Why this may help
+                why_help = intervention.get('why_this_may_help', '')
+                cell_idx = get_cell_index(row_idx, 1)
                 if why_help:
-                    add_paragraph(f"Why this may help: {why_help}")
-                    add_paragraph("")
-                # Addresses multiple concerns
+                    cell_updates.append({
+                        'insertText': {
+                            'location': {'index': cell_idx},
+                            'text': why_help
+                        }
+                    })
+                
+                # Column 2: Addresses multiple concerns
                 concerns = intervention.get('addresses_multiple_concerns', [])
-                if concerns:
-                    add_paragraph("May help with: " + ", ".join(concerns))
-                    add_paragraph("")
+                concerns_text = '\n'.join([f"• {c}" for c in concerns]) if concerns else ''
+                cell_idx = get_cell_index(row_idx, 2)
+                if concerns_text:
+                    cell_updates.append({
+                        'insertText': {
+                            'location': {'index': cell_idx},
+                            'text': concerns_text
+                        }
+                    })
                 
-                # What others have done
+                # Column 3: What others have done
                 what_done = intervention.get('what_others_have_done', [])
-                if what_done:
-                    add_paragraph("What others have done:")
-                    for action in what_done:
-                        add_paragraph(f"  • {action}")
-                    add_paragraph("")
-                    
-                # What families tracked
+                what_done_text = '\n'.join([f"• {w}" for w in what_done]) if what_done else ''
+                cell_idx = get_cell_index(row_idx, 3)
+                if what_done_text:
+                    cell_updates.append({
+                        'insertText': {
+                            'location': {'index': cell_idx},
+                            'text': what_done_text
+                        }
+                    })
+                
+                # Column 4: What families tracked
                 tracked = intervention.get('what_families_tracked', [])
-                if tracked:
-                    add_paragraph("What families tracked:")
-                    for item in tracked:
-                        add_paragraph(f"  • {item}")
-                    add_paragraph("")
+                tracked_text = '\n'.join([f"• {t}" for t in tracked]) if tracked else ''
+                cell_idx = get_cell_index(row_idx, 4)
+                if tracked_text:
+                    cell_updates.append({
+                        'insertText': {
+                            'location': {'index': cell_idx},
+                            'text': tracked_text
+                        }
+                    })
                 
-                # Common decision points
+                # Column 5: Common decision points
                 decision_points = intervention.get('common_decision_points', [])
-                if decision_points:
-                    add_paragraph("Common decision points:")
-                    for point in decision_points:
-                        add_paragraph(f"  • {point}")
-                    add_paragraph("")
+                decision_text = '\n'.join([f"• {d}" for d in decision_points]) if decision_points else ''
+                cell_idx = get_cell_index(row_idx, 5)
+                if decision_text:
+                    cell_updates.append({
+                        'insertText': {
+                            'location': {'index': cell_idx},
+                            'text': decision_text
+                        }
+                    })
                 
-                # Considerations
+                # Column 6: Considerations
                 considerations = intervention.get('considerations', [])
-                if considerations:
-                    add_paragraph("Considerations:")
-                    for consideration in considerations:
-                        add_paragraph(f"  • {consideration}")
-                    add_paragraph("")
+                considerations_text = '\n'.join([f"• {c}" for c in considerations]) if considerations else ''
+                cell_idx = get_cell_index(row_idx, 6)
+                if considerations_text:
+                    cell_updates.append({
+                        'insertText': {
+                            'location': {'index': cell_idx},
+                            'text': considerations_text
+                        }
+                    })
+            
+            # Add all cell updates in reverse order to prevent index shifting
+            requests.extend(reversed(cell_updates))
+            
+            # Style the table to fit page width
+            # Set table width to match page margins (8.5" page with 1" margins = 6.5" content width)
+            table_width_magnitude = 468  # 6.5 inches * 72 points per inch = 468 points
+            
+            # Set column widths to distribute evenly across page width
+            column_width = table_width_magnitude / num_cols
+            
+            for col_idx in range(num_cols):
+                requests.append({
+                    'updateTableColumnProperties': {
+                        'tableStartLocation': {'index': table_start_index},
+                        'columnIndices': [col_idx],
+                        'tableColumnProperties': {
+                            'widthType': 'FIXED_WIDTH',
+                            'width': {
+                                'magnitude': column_width,
+                                'unit': 'PT'
+                            }
+                        },
+                        'fields': 'widthType,width'
+                    }
+                })
+            
+            # Add spacing after table
+            add_paragraph("")
         
         # General notes
         general_notes = actionable_steps.get('general_notes', [])
