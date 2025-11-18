@@ -379,8 +379,11 @@ class GoogleDocsService:
                 table_start_index = index
                 requests.append({'insertTable': {'rows': 6, 'columns': 2, 'location': {'index': table_start_index}}})
                 table_locations.append({'start_index': table_start_index, 'intervention': intervention})
-                index += (6 * 2 * 2) + 1
-                add_paragraph("")
+                # After inserting a table, the cursor is inside the first cell.
+                # The document's length has increased, so we must update the index
+                # to ensure subsequent content is placed after the table.
+                # A 6x2 table adds (6*2*2) + 1 = 25 characters.
+                index += 25
 
         # --- General Notes ---
         general_notes = actionable_steps.get('general_notes') or []
