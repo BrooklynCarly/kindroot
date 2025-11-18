@@ -652,13 +652,16 @@ class GoogleDocsService:
             # Set padding and wrapping for all cells
             for row_idx in range(num_rows):
                 for col_idx in range(num_cols):
-                    cell_location = {
-                        'tableStartLocation': {'index': table_start_index},
-                        'rowIndex': row_idx,
-                        'columnIndex': col_idx
-                    }
                     requests.append({
                         'updateTableCellStyle': {
+                            'tableStartLocation': {'index': table_start_index},
+                            'tableRange': {
+                                'tableCellLocation': {
+                                    'tableStartLocation': {'index': table_start_index},
+                                    'rowIndex': row_idx,
+                                    'columnIndex': col_idx
+                                }
+                            },
                             'tableCellStyle': {
                                 'paddingTop': {'magnitude': 5, 'unit': 'PT'},
                                 'paddingBottom': {'magnitude': 5, 'unit': 'PT'},
@@ -666,8 +669,7 @@ class GoogleDocsService:
                                 'paddingRight': {'magnitude': 5, 'unit': 'PT'},
                                 'contentAlignment': 'TOP'
                             },
-                            'fields': 'paddingTop,paddingBottom,paddingLeft,paddingRight,contentAlignment',
-                            **cell_location
+                            'fields': 'paddingTop,paddingBottom,paddingLeft,paddingRight,contentAlignment'
                         }
                     })
             
