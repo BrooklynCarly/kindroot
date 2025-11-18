@@ -682,8 +682,8 @@ class GoogleDocsService:
                         }
                     })
             
-            # Add spacing after table
-            add_paragraph("")
+            # Don't add paragraph after table - let next section handle spacing
+            # This avoids complex index calculations after table population
         
         # General notes
         general_notes = actionable_steps.get('general_notes', [])
