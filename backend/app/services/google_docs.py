@@ -508,8 +508,8 @@ class GoogleDocsService:
             add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
             add_paragraph("")
             
-            # Create table for approaches
-            num_rows = len(approaches) + 1  # +1 for header row
+            # Create table: 1 header row + N data rows, 7 columns
+            num_rows = len(approaches) + 1
             num_cols = 7
             table_start_index = index
             
@@ -522,134 +522,121 @@ class GoogleDocsService:
                 }
             })
             
-            # Table structure: each cell takes 2 indices (content + end marker)
-            # Total table size = (rows * cols * 2) + 1 (for table end)
-            table_size = (num_rows * num_cols * 2) + 1
-            index += table_size
+            # Calculate new index after table insertion
+            # Each cell takes 2 characters (content + end-of-cell), plus 1 for table end
+            index = table_start_index + (num_rows * num_cols * 2) + 1
             
-            # Prepare all cell content insertions (we'll add them in reverse order)
-            cell_updates = []
-            
-            # Helper function to get cell index
-            def get_cell_index(row, col):
-                return table_start_index + 1 + (row * num_cols + col) * 2
-            
+            # Now populate the table cells using separate requests
             # Header row (row 0)
             headers = [
                 "Intervention",
-                "Why Help",
-                "Concerns",
-                "What Done",
-                "Tracked",
+                "Why This May Help",
+                "May Help With",
+                "What Others Did",
+                "What Families Tracked",
                 "Decision Points",
                 "Considerations"
             ]
             
             for col_idx, header_text in enumerate(headers):
-                cell_idx = get_cell_index(0, col_idx)
-                cell_updates.append({
+                # Calculate cell position: table_start + 1 + (row * num_cols + col) * 2
+                cell_index = table_start_index + 1 + (0 * num_cols + col_idx) * 2
+                requests.append({
                     'insertText': {
-                        'location': {'index': cell_idx},
+                        'location': {'index': cell_index},
                         'text': header_text
                     }
                 })
-                # Style header as bold
-                cell_updates.append({
+                # Make header bold
+                requests.append({
                     'updateTextStyle': {
                         'range': {
-                            'startIndex': cell_idx,
-                            'endIndex': cell_idx + len(header_text)
+                            'startIndex': cell_index,
+                            'endIndex': cell_index + len(header_text)
                         },
                         'textStyle': {
-                            'bold': True,
-                            'fontSize': {'magnitude': 10, 'unit': 'PT'}
+                            'bold': True
                         },
-                        'fields': 'bold,fontSize'
+                        'fields': 'bold'
                     }
                 })
             
             # Data rows
             for row_idx, intervention in enumerate(approaches, start=1):
                 # Column 0: Intervention name
-                intervention_name = intervention.get('intervention_name', 'Unknown')
-                cell_idx = get_cell_index(row_idx, 0)
-                cell_updates.append({
+                name = intervention.get('intervention_name', 'Unknown')
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 0) * 2
+                requests.append({
                     'insertText': {
-                        'location': {'index': cell_idx},
-                        'text': intervention_name
+                        'location': {'index': cell_index},
+                        'text': name
                     }
                 })
                 
                 # Column 1: Why this may help
-                why_help = intervention.get('why_this_may_help', '')
-                cell_idx = get_cell_index(row_idx, 1)
-                if why_help:
-                    cell_updates.append({
-                        'insertText': {
-                            'location': {'index': cell_idx},
-                            'text': why_help
-                        }
-                    })
+                why_help = intervention.get('why_this_may_help', 'N/A')
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 1) * 2
+                requests.append({
+                    'insertText': {
+                        'location': {'index': cell_index},
+                        'text': why_help
+                    }
+                })
                 
-                # Column 2: Addresses multiple concerns
+                # Column 2: Addresses concerns
                 concerns = intervention.get('addresses_multiple_concerns', [])
-                concerns_text = '\n'.join([f"• {c}" for c in concerns]) if concerns else ''
-                cell_idx = get_cell_index(row_idx, 2)
-                if concerns_text:
-                    cell_updates.append({
-                        'insertText': {
-                            'location': {'index': cell_idx},
-                            'text': concerns_text
-                        }
-                    })
+                concerns_text = ', '.join(concerns) if concerns else 'N/A'
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 2) * 2
+                requests.append({
+                    'insertText': {
+                        'location': {'index': cell_index},
+                        'text': concerns_text
+                    }
+                })
                 
-                # Column 3: What others have done
+                # Column 3: What others did
                 what_done = intervention.get('what_others_have_done', [])
-                what_done_text = '\n'.join([f"• {w}" for w in what_done]) if what_done else ''
-                cell_idx = get_cell_index(row_idx, 3)
-                if what_done_text:
-                    cell_updates.append({
-                        'insertText': {
-                            'location': {'index': cell_idx},
-                            'text': what_done_text
-                        }
-                    })
+                what_done_text = '\n'.join(f"• {item}" for item in what_done) if what_done else 'N/A'
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 3) * 2
+                requests.append({
+                    'insertText': {
+                        'location': {'index': cell_index},
+                        'text': what_done_text
+                    }
+                })
                 
                 # Column 4: What families tracked
                 tracked = intervention.get('what_families_tracked', [])
-                tracked_text = '\n'.join([f"• {t}" for t in tracked]) if tracked else ''
-                cell_idx = get_cell_index(row_idx, 4)
-                if tracked_text:
-                    cell_updates.append({
-                        'insertText': {
-                            'location': {'index': cell_idx},
-                            'text': tracked_text
-                        }
-                    })
+                tracked_text = '\n'.join(f"• {item}" for item in tracked) if tracked else 'N/A'
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 4) * 2
+                requests.append({
+                    'insertText': {
+                        'location': {'index': cell_index},
+                        'text': tracked_text
+                    }
+                })
                 
-                # Column 5: Common decision points
+                # Column 5: Decision points
                 decision_points = intervention.get('common_decision_points', [])
-                decision_text = '\n'.join([f"• {d}" for d in decision_points]) if decision_points else ''
-                cell_idx = get_cell_index(row_idx, 5)
-                if decision_text:
-                    cell_updates.append({
-                        'insertText': {
-                            'location': {'index': cell_idx},
-                            'text': decision_text
-                        }
-                    })
+                decision_text = '\n'.join(f"• {item}" for item in decision_points) if decision_points else 'N/A'
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 5) * 2
+                requests.append({
+                    'insertText': {
+                        'location': {'index': cell_index},
+                        'text': decision_text
+                    }
+                })
                 
                 # Column 6: Considerations
                 considerations = intervention.get('considerations', [])
-                considerations_text = '\n'.join([f"• {c}" for c in considerations]) if considerations else ''
-                cell_idx = get_cell_index(row_idx, 6)
-                if considerations_text:
-                    cell_updates.append({
-                        'insertText': {
-                            'location': {'index': cell_idx},
-                            'text': considerations_text
-                        }
-                    })
+                considerations_text = '\n'.join(f"• {item}" for item in considerations) if considerations else 'N/A'
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 6) * 2
+                requests.append({
+                    'insertText': {
+                        'location': {'index': cell_index},
+                        'text': considerations_text
+                    }
+                })
             
             # Add all cell updates in reverse order to prevent index shifting
             requests.extend(reversed(cell_updates))
