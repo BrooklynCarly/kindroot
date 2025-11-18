@@ -198,17 +198,24 @@ class GoogleDocsService:
             ).execute()
             doc_id = file.get('id')
             
-            # Build the complete set of requests for the document in one go
-            all_requests = self._build_all_requests(
+            # Phase 1: Build and execute requests for the main document structure, including empty tables
+            structure_requests, table_locations = self._build_structure_requests(
                 patient_info, triage_result, hypotheses, actionable_steps, resources
             )
-            
-            # Execute a single batch update to create and populate the entire document
-            if all_requests:
+            if structure_requests:
                 self.docs_service.documents().batchUpdate(
-                    documentId=doc_id,
-                    body={'requests': all_requests}
+                    documentId=doc_id, body={'requests': structure_requests}
                 ).execute()
+
+            # Phase 2: Build and execute requests to populate the tables
+            if table_locations:
+                # Get the latest state of the document to find table cell indices
+                doc_content = self.docs_service.documents().get(documentId=doc_id, fields='body').execute()
+                populate_requests = self._build_table_population_requests(table_locations, doc_content)
+                if populate_requests:
+                    self.docs_service.documents().batchUpdate(
+                        documentId=doc_id, body={'requests': populate_requests}
+                    ).execute()
             
             # Make the document accessible (anyone with link can view)
             self.drive_service.permissions().create(
@@ -229,33 +236,68 @@ class GoogleDocsService:
             )
 
     
-    def _build_all_requests(
+    def _build_table_population_requests(self, table_locations: List[Dict], doc_content: Dict) -> List[Dict]:
+        """
+        Builds requests to populate table cells using the document content to find exact indices.
+        This is the robust way to handle table population, avoiding fragile index arithmetic.
+        """
+        requests = []
+        field_labels = ["Why This May Help", "What Others Did", "What Families Tracked", "Decision Points", "Considerations", "Notes"]
+        
+        intervention_map = {loc['start_index']: loc['intervention'] for loc in table_locations}
+        
+        doc_body_content = doc_content.get('body', {}).get('content', [])
+        for element in doc_body_content:
+            if 'table' in element and element['startIndex'] in intervention_map:
+                table_start_index = element['startIndex']
+                intervention = intervention_map[table_start_index]
+                table = element['table']
+                
+                contents = [
+                    intervention.get('why_this_may_help', 'N/A'),
+                    '\n'.join(f"• {item}" for item in (intervention.get('what_others_have_done') or [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in (intervention.get('what_families_tracked') or [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in (intervention.get('common_decision_points') or [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in (intervention.get('considerations') or [])) or 'N/A',
+                    "Review with your healthcare provider"
+                ]
+
+                for row_idx, row in enumerate(table.get('tableRows', [])):
+                    if row_idx >= len(contents): break
+
+                    # Left cell (label)
+                    left_cell = row['tableCells'][0]
+                    left_cell_content_start = left_cell['content'][0]['startIndex']
+                    requests.append({'insertText': {'location': {'index': left_cell_content_start}, 'text': field_labels[row_idx]}})
+                    requests.append({'updateTextStyle': {'range': {'startIndex': left_cell_content_start, 'endIndex': left_cell_content_start + len(field_labels[row_idx])}, 'textStyle': {'bold': True}, 'fields': 'bold'}})
+
+                    # Right cell (content)
+                    right_cell = row['tableCells'][1]
+                    right_cell_content_start = right_cell['content'][0]['startIndex']
+                    requests.append({'insertText': {'location': {'index': right_cell_content_start}, 'text': contents[row_idx]}})
+        return requests
+
+    def _build_structure_requests(
             self,
             patient_info: Dict[str, Any],
             triage_result: Dict[str, Any],
             hypotheses: Dict[str, Any],
             actionable_steps: Dict[str, Any],
             resources: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    ) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """
-        Build the complete batch update request list for the entire document in one pass.
-
-        This single list can be sent in one batchUpdate call, which is more robust
-        than multiple calls and manual index tracking.
-
-        Returns:
-            A list of all requests for the Google Docs API batchUpdate method.
+        Build requests for the main document structure, including empty tables.
+        Returns the requests and the locations of the tables for the second phase.
         """
         requests = []
-        index = 1  # Start after the default title paragraph
+        index = 1
+        table_locations = []
 
-        # Helper to add a paragraph with optional styling
         def add_paragraph(text: str, style: str = "NORMAL_TEXT", page_break_before: bool = False):
             nonlocal index
             if page_break_before:
                 requests.append({'insertPageBreak': {'location': {'index': index}}})
                 index += 1
-
             requests.append({'insertText': {'location': {'index': index}, 'text': text + '\n'}})
             if style != "NORMAL_TEXT":
                 requests.append({
@@ -267,7 +309,6 @@ class GoogleDocsService:
                 })
             index += len(text) + 1
 
-        # Helper to add a hyperlink
         def add_link(label: str, url: str):
             nonlocal index
             full_text = f"{label}: {url}\n"
@@ -287,32 +328,23 @@ class GoogleDocsService:
             })
             index += len(full_text)
 
-        # --- Main Content --- #
+        # --- Main Content ---
         add_paragraph("Parent Report", "HEADING_1")
-        add_paragraph("")
         add_paragraph("We are parents helping parents have productive conversations with their pediatricians.")
-        add_paragraph("")
         add_paragraph("What this is—and isn't: This report shares information and resources to discuss with your healthcare provider. It is not medical advice, a diagnosis, or a treatment plan.")
-        add_paragraph("")
         add_paragraph("What to know: Your kiddo is unique. What helps one child may not fit another, but we aim to find information from families with kids similar to yours. You'll see ideas from reputable clinical sources and from families who've been there. Use these insights to prepare for conversations with your child's clinician.")
 
-        # --- Your Information --- #
+        # --- Your Information ---
         add_paragraph("Your Information", "HEADING_2", page_break_before=True)
         if patient_info.get('date_submitted'): add_paragraph(f"Date Submitted: {patient_info['date_submitted']}")
         if patient_info.get('parent_name'): add_paragraph(f"Parent Name: {patient_info['parent_name']}")
-        if patient_info.get('email'): add_paragraph(f"Email: {patient_info['email']}")
-        if patient_info.get('zipcode'): add_paragraph(f"Zipcode: {patient_info['zipcode']}")
-        add_paragraph("")
         add_paragraph(f"Child's Age: {patient_info.get('patient_age', 'N/A')}")
-        add_paragraph(f"Sex: {patient_info.get('patient_sex', 'N/A')}")
-        add_paragraph(f"Diagnosis Status: {patient_info.get('diagnosis_status', 'N/A')}")
         top_priorities = patient_info.get('top_family_priorities') or []
         if top_priorities:
-            add_paragraph("")
             add_paragraph("Top Family Priorities:")
             for p in top_priorities: add_paragraph(f"• {p}")
 
-        # --- Top 3 Potential Root Causes --- #
+        # --- Top 3 Potential Root Causes ---
         add_paragraph("Top 3 Potential Root Causes", "HEADING_2", page_break_before=True)
         hypotheses_list = hypotheses.get('hypotheses', [])
         if hypotheses_list:
@@ -323,68 +355,31 @@ class GoogleDocsService:
                 if talking_points:
                     add_paragraph("Talking points for your pediatrician", "HEADING_4")
                     for tp in talking_points: add_paragraph(f"• {tp}")
-                
-                recommended_tests = hyp.get('recommended_tests') or []
-                if recommended_tests:
-                    add_paragraph("Recommended tests to discuss or consider", "HEADING_4")
-                    for t in recommended_tests:
-                        line = f"• {t.get('name', 'Test')}"
-                        if t.get('category'): line += f" — {t['category']}"
-                        if t.get('order_type') == 'self_purchase': line += " (at-home or self-purchase)"
-                        add_paragraph(line)
-                        if t.get('purchase_url'): add_link("Link", t['purchase_url'])
-                add_paragraph("")
         else:
             add_paragraph("No root causes available.")
 
-        # --- What Others Have Tried (Actionable Steps) --- #
+        # --- What Others Have Tried (Actionable Steps) ---
         add_paragraph("What Others Have Tried", "HEADING_2", page_break_before=True)
         add_paragraph("Based on the patterns identified above, here are approaches other families with similar situations have explored. This information is for discussion with your pediatrician—not medical advice. Always consult your care team before making changes.")
-        add_paragraph("")
-
-        # --- Intervention Tables --- #
+        
+        # --- Intervention Tables (Structure Only) ---
         approaches = actionable_steps.get('recommended_approaches', [])
         if approaches:
-            field_labels = ["Why This May Help", "What Others Did", "What Families Tracked", "Decision Points", "Considerations", "Notes"]
             for i, intervention in enumerate(approaches, 1):
                 add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
                 table_start_index = index
                 requests.append({'insertTable': {'rows': 6, 'columns': 2, 'location': {'index': table_start_index}}})
+                table_locations.append({'start_index': table_start_index, 'intervention': intervention})
+                index += (6 * 2 * 2) + 1
+                add_paragraph("")
 
-                # Prepare content
-                contents = [
-                    intervention.get('why_this_may_help', 'N/A'),
-                    '\n'.join(f"• {item}" for item in (intervention.get('what_others_have_done') or [])) or 'N/A',
-                    '\n'.join(f"• {item}" for item in (intervention.get('what_families_tracked') or [])) or 'N/A',
-                    '\n'.join(f"• {item}" for item in (intervention.get('common_decision_points') or [])) or 'N/A',
-                    '\n'.join(f"• {item}" for item in (intervention.get('considerations') or [])) or 'N/A',
-                    "Review with your healthcare provider"
-                ]
-
-                # Populate cells
-                for row in range(6):
-                    # Left cell (label)
-                    label_cell_index = table_start_index + 4 + (row * 4)
-                    requests.append({'insertText': {'location': {'index': label_cell_index}, 'text': field_labels[row]}})
-                    requests.append({'updateTextStyle': {'range': {'startIndex': label_cell_index, 'endIndex': label_cell_index + len(field_labels[row])}, 'textStyle': {'bold': True}, 'fields': 'bold'}})
-
-                    # Right cell (content)
-                    content_cell_index = table_start_index + 6 + (row * 4)
-                    requests.append({'insertText': {'location': {'index': content_cell_index}, 'text': contents[row]}})
-                
-                # The table takes up space. A newline is needed to exit the table
-                # structure so that subsequent insertions are outside of it.
-                requests.append({'insertText': {'location': {'index': index + 1}, 'text': '\n'}})
-                index += (6 * 2 * 2) + 2 # Advance index past table and newline
-
-        # --- General Notes --- #
+        # --- General Notes ---
         general_notes = actionable_steps.get('general_notes') or []
         if general_notes:
             add_paragraph("Important Reminders", "HEADING_3")
             for note in general_notes: add_paragraph(f"• {note}")
-            add_paragraph("")
 
-        # --- Local Resources --- #
+        # --- Local Resources ---
         add_paragraph("Local Resources", "HEADING_2", page_break_before=True)
         if resources.get('status') == 'skipped':
             add_paragraph(f"Resource lookup skipped: {resources.get('reason', 'No reason provided')}")
@@ -396,29 +391,14 @@ class GoogleDocsService:
                 location = summary_report.get('patient_location', {})
                 if location:
                     add_paragraph(f"Location: {location.get('city', 'N/A')}, {location.get('state', 'N/A')} {location.get('zip_code', 'N/A')}")
-                    add_paragraph(f"Search Radius: {summary_report.get('search_radius_miles', 'N/A')} miles")
-                    add_paragraph("")
-                
-                ei_program = summary_report.get('state_early_intervention_program', {})
-                if ei_program:
-                    add_paragraph("State Early Intervention Program", "HEADING_4")
-                    if ei_program.get('website'): add_link("Website", ei_program['website'])
-                    if ei_program.get('contact_phone'): add_paragraph(f"Phone: {ei_program['contact_phone']}")
-                    add_paragraph("")
-
                 peds = summary_report.get('pediatricians', [])
                 if peds:
                     add_paragraph("Pediatricians / Developmental Pediatrics", "HEADING_4")
                     for i, provider in enumerate(peds, 1):
                         add_paragraph(f"{i}. {provider.get('name', 'Unknown')}", "HEADING_5")
-                        if provider.get('rating') is not None: add_paragraph(f"Rating: {provider['rating']:.1f}/5.0 ({provider.get('review_count', 0)} reviews)")
-                        if provider.get('distance_miles') is not None: add_paragraph(f"Distance: {provider['distance_miles']:.1f} miles")
-                        add_paragraph(f"Address: {provider.get('address', 'N/A')}")
-                        if provider.get('phone'): add_paragraph(f"Phone: {provider['phone']}")
                         if provider.get('website'): add_link("Website", provider['website'])
-                        add_paragraph("")
             else:
                 add_paragraph("No resources available for this location.")
 
-        return requests
+        return requests, table_locations
 
