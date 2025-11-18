@@ -267,14 +267,15 @@ class GoogleDocsService:
 
                     # Left cell (label)
                     left_cell = row['tableCells'][0]
-                    left_cell_content_start = left_cell['content'][0]['startIndex']
-                    requests.append({'insertText': {'location': {'index': left_cell_content_start}, 'text': field_labels[row_idx]}})
-                    requests.append({'updateTextStyle': {'range': {'startIndex': left_cell_content_start, 'endIndex': left_cell_content_start + len(field_labels[row_idx])}, 'textStyle': {'bold': True}, 'fields': 'bold'}})
+                    # The correct insertion point in an empty cell is its endIndex - 1.
+                    left_cell_insertion_index = left_cell['endIndex'] - 1
+                    requests.append({'insertText': {'location': {'index': left_cell_insertion_index}, 'text': field_labels[row_idx]}})
+                    requests.append({'updateTextStyle': {'range': {'startIndex': left_cell_insertion_index, 'endIndex': left_cell_insertion_index + len(field_labels[row_idx])}, 'textStyle': {'bold': True}, 'fields': 'bold'}})
 
                     # Right cell (content)
                     right_cell = row['tableCells'][1]
-                    right_cell_content_start = right_cell['content'][0]['startIndex']
-                    requests.append({'insertText': {'location': {'index': right_cell_content_start}, 'text': contents[row_idx]}})
+                    right_cell_insertion_index = right_cell['endIndex'] - 1
+                    requests.append({'insertText': {'location': {'index': right_cell_insertion_index}, 'text': contents[row_idx]}})
         return requests
 
     def _build_structure_requests(
