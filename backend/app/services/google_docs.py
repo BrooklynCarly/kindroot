@@ -198,34 +198,17 @@ class GoogleDocsService:
             ).execute()
             doc_id = file.get('id')
             
-            # Build the content requests (includes empty table if needed)
-            main_requests, table_data = self._build_report_content(patient_info, triage_result, hypotheses, actionable_steps, resources)
+            # Build the complete set of requests for the document in one go
+            all_requests = self._build_all_requests(
+                patient_info, triage_result, hypotheses, actionable_steps, resources
+            )
             
-            # Phase 1: Update document with main content (includes empty table structure)
-            self.docs_service.documents().batchUpdate(
-                documentId=doc_id,
-                body={'requests': main_requests}
-            ).execute()
-            
-            # Phase 2: If we created tables, populate them now that the structures exist
-            if table_data:
-                table_requests = self._build_table_population_requests(table_data)
+            # Execute a single batch update to create and populate the entire document
+            if all_requests:
                 self.docs_service.documents().batchUpdate(
                     documentId=doc_id,
-                    body={'requests': table_requests}
+                    body={'requests': all_requests}
                 ).execute()
-                
-                # Phase 3: If there's remaining content to add (general notes, resources), add it now
-                if table_data.get('has_remaining_content'):
-                    # Get current document to find where to append content
-                    doc = self.docs_service.documents().get(documentId=doc_id).execute()
-                    doc_end_index = doc.get('body').get('content')[-1].get('endIndex') - 1
-                    
-                    remaining_requests = self._build_remaining_content_requests(table_data, doc_end_index)
-                    self.docs_service.documents().batchUpdate(
-                        documentId=doc_id,
-                        body={'requests': remaining_requests}
-                    ).execute()
             
             # Make the document accessible (anyone with link can view)
             self.drive_service.permissions().create(
@@ -245,321 +228,66 @@ class GoogleDocsService:
                 detail=f"Error creating Google Doc: {str(e)}"
             )
 
-    def _build_remaining_content_requests(self, table_data: Dict[str, Any], start_index: int) -> List[Dict[str, Any]]:
-        """
-        Build requests for remaining content after tables are populated (general notes, resources).
-        This is added at the end of the document.
-        
-        Args:
-            table_data: Dictionary containing general_notes, resources, patient_info
-            start_index: Index at end of document where content should be appended
-            
-        Returns:
-            List of batch update requests for remaining content
-        """
-        requests = []
-        # Start at the end of the current document
-        index = start_index
-        
-        # Helper to add text at end of document
-        def add_end_paragraph(text: str, style: str = "NORMAL_TEXT", page_break_before: bool = False):
-            nonlocal index
-            
-            if page_break_before:
-                requests.append({
-                    'insertText': {
-                        'location': {'index': index},
-                        'text': '\n'  # Page break via newline
-                    }
-                })
-                index += 1
-            
-            requests.append({
-                'insertText': {
-                    'location': {'index': index},
-                    'text': text + '\n'
-                }
-            })
-            
-            if style != "NORMAL_TEXT":
-                text_length = len(text)
-                requests.append({
-                    'updateParagraphStyle': {
-                        'range': {
-                            'startIndex': index,
-                            'endIndex': index + text_length + 1
-                        },
-                        'paragraphStyle': {
-                            'namedStyleType': style
-                        },
-                        'fields': 'namedStyleType'
-                    }
-                })
-            
-            index += len(text) + 1
-        
-        # Add general notes
-        general_notes = table_data.get('general_notes', [])
-        if general_notes:
-            add_end_paragraph("Important Reminders", "HEADING_3")
-            for note in general_notes:
-                add_end_paragraph(f"• {note}")
-            add_end_paragraph("")
-        
-        # Add resources section
-        add_end_paragraph("Local Resources", "HEADING_2", page_break_before=True)
-        resources = table_data.get('resources', {})
-        patient_info = table_data.get('patient_info', {})
-        
-        # Check if resources generation was skipped
-        if resources.get('status') == 'skipped':
-            add_end_paragraph(f"Resource lookup skipped: {resources.get('reason', 'No reason provided')}")
-        elif resources.get('status') == 'error':
-            add_end_paragraph(f"Error generating resources: {resources.get('message', 'Unknown error')}")
-        else:
-            summary_report = resources.get('summary_report', {})
-            
-            if summary_report:
-                # Add location info, EI program, providers, etc.
-                # (Simplified version - full implementation would match the original)
-                add_end_paragraph("Resources have been generated - see document for details")
-            else:
-                add_end_paragraph("No resources available for this location")
-        
-        return requests
     
-    def _build_table_population_requests(self, table_data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """
-        Build requests to populate individual 2-column tables (one per intervention).
-        This must be called AFTER the table structures exist in the document.
-        
-        Args:
-            table_data: Dictionary containing approaches and table start indices
-            
-        Returns:
-            List of batch update requests to populate and style all tables
-        """
-        requests = []
-        approaches = table_data['approaches']
-        table_starts = table_data['tables']
-        
-        # Field labels for the left column
-        field_labels = [
-            "Why This May Help",
-            "What Others Did",
-            "What Families Tracked",
-            "Decision Points",
-            "Considerations",
-            "Notes"
-        ]
-        
-        # Process each intervention's table
-        for table_idx, (table_start, intervention) in enumerate(zip(table_starts, approaches)):
-            # Each table has 6 rows, 2 columns
-            # Row format: [Label | Content]
-            
-            # Get all the content
-            why_help = intervention.get('why_this_may_help', 'N/A')
-            what_done = intervention.get('what_others_have_done', [])
-            what_done_text = '\n'.join(f"• {item}" for item in what_done) if what_done else 'N/A'
-            tracked = intervention.get('what_families_tracked', [])
-            tracked_text = '\n'.join(f"• {item}" for item in tracked) if tracked else 'N/A'
-            decision_points = intervention.get('common_decision_points', [])
-            decision_text = '\n'.join(f"• {item}" for item in decision_points) if decision_points else 'N/A'
-            considerations = intervention.get('considerations', [])
-            considerations_text = '\n'.join(f"• {item}" for item in considerations) if considerations else 'N/A'
-            
-            contents = [why_help, what_done_text, tracked_text, decision_text, considerations_text, "Review with your healthcare provider"]
-            
-            # Populate each row
-            for row_idx in range(6):
-                # Left column (label) - make it bold
-                label_cell_index = table_start + 1 + (row_idx * 2 + 0) * 2
-                requests.append({
-                    'insertText': {
-                        'location': {'index': label_cell_index},
-                        'text': field_labels[row_idx]
-                    }
-                })
-                requests.append({
-                    'updateTextStyle': {
-                        'range': {
-                            'startIndex': label_cell_index,
-                            'endIndex': label_cell_index + len(field_labels[row_idx])
-                        },
-                        'textStyle': {
-                            'bold': True
-                        },
-                        'fields': 'bold'
-                    }
-                })
-                
-                # Right column (content)
-                content_cell_index = table_start + 1 + (row_idx * 2 + 1) * 2
-                requests.append({
-                    'insertText': {
-                        'location': {'index': content_cell_index},
-                        'text': contents[row_idx]
-                    }
-                })
-            
-            # Style this table
-            # Set column widths (30% for label, 70% for content)
-            requests.append({
-                'updateTableColumnProperties': {
-                    'tableStartLocation': {'index': table_start},
-                    'columnIndices': [0],
-                    'tableColumnProperties': {
-                        'widthType': 'FIXED_WIDTH',
-                        'width': {
-                            'magnitude': 140,  # ~30% of 468pt
-                            'unit': 'PT'
-                        }
-                    },
-                    'fields': 'widthType,width'
-                }
-            })
-            requests.append({
-                'updateTableColumnProperties': {
-                    'tableStartLocation': {'index': table_start},
-                    'columnIndices': [1],
-                    'tableColumnProperties': {
-                        'widthType': 'FIXED_WIDTH',
-                        'width': {
-                            'magnitude': 328,  # ~70% of 468pt
-                            'unit': 'PT'
-                        }
-                    },
-                    'fields': 'widthType,width'
-                }
-            })
-            
-            # Set cell padding for all cells
-            for row_idx in range(6):
-                for col_idx in range(2):
-                    requests.append({
-                        'updateTableCellStyle': {
-                            'tableRange': {
-                                'tableCellLocation': {
-                                    'tableStartLocation': {'index': table_start},
-                                    'rowIndex': row_idx,
-                                    'columnIndex': col_idx
-                                }
-                            },
-                            'tableCellStyle': {
-                                'paddingTop': {'magnitude': 5, 'unit': 'PT'},
-                                'paddingBottom': {'magnitude': 5, 'unit': 'PT'},
-                                'paddingLeft': {'magnitude': 5, 'unit': 'PT'},
-                                'paddingRight': {'magnitude': 5, 'unit': 'PT'},
-                                'contentAlignment': 'TOP'
-                            },
-                            'fields': 'paddingTop,paddingBottom,paddingLeft,paddingRight,contentAlignment'
-                        }
-                    })
-        
-        return requests
-    
-    def _build_report_content(
+    def _build_all_requests(
             self,
             patient_info: Dict[str, Any],
             triage_result: Dict[str, Any],
             hypotheses: Dict[str, Any],
             actionable_steps: Dict[str, Any],
             resources: Dict[str, Any]
-        ) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    ) -> List[Dict[str, Any]]:
         """
-         Build the batch update requests for document content.
-    
+        Build the complete batch update request list for the entire document in one pass.
+
+        This single list can be sent in one batchUpdate call, which is more robust
+        than multiple calls and manual index tracking.
+
         Returns:
-            Tuple of (main_requests, table_data) - table_data is dict with table info for phase 2 population
+            A list of all requests for the Google Docs API batchUpdate method.
         """
         requests = []
-        index = 1  # Start after the title
-        table_data = None  # Will be populated if we create a table
-    
-        # Helper to add text with optional styling
+        index = 1  # Start after the default title paragraph
+
+        # Helper to add a paragraph with optional styling
         def add_paragraph(text: str, style: str = "NORMAL_TEXT", page_break_before: bool = False):
             nonlocal index
-            
-            # Add page break before if requested
             if page_break_before:
-                requests.append({
-                    'insertPageBreak': {
-                        'location': {'index': index}
-                    }
-                })
+                requests.append({'insertPageBreak': {'location': {'index': index}}})
                 index += 1
-            
-            # Insert text
-            requests.append({
-                'insertText': {
-                    'location': {'index': index},
-                    'text': text + '\n'
-                }
-            })
-            
-            # Apply styling if not normal text
+
+            requests.append({'insertText': {'location': {'index': index}, 'text': text + '\n'}})
             if style != "NORMAL_TEXT":
-                text_length = len(text)
                 requests.append({
                     'updateParagraphStyle': {
-                        'range': {
-                            'startIndex': index,
-                            'endIndex': index + text_length + 1  # Include the newline
-                        },
-                        'paragraphStyle': {
-                            'namedStyleType': style
-                        },
+                        'range': {'startIndex': index, 'endIndex': index + len(text) + 1},
+                        'paragraphStyle': {'namedStyleType': style},
                         'fields': 'namedStyleType'
                     }
                 })
-            
-            # Update index
             index += len(text) + 1
-        
-        # Helper to add text with a clickable hyperlink
+
+        # Helper to add a hyperlink
         def add_link(label: str, url: str):
             nonlocal index
             full_text = f"{label}: {url}\n"
-            
-            # Insert the text
-            requests.append({
-                'insertText': {
-                    'location': {'index': index},
-                    'text': full_text
-                }
-            })
-            
-            # Make the URL portion clickable
-            url_start = index + len(label) + 2  # After "label: "
+            requests.append({'insertText': {'location': {'index': index}, 'text': full_text}})
+            url_start = index + len(label) + 2
             url_end = url_start + len(url)
-            
             requests.append({
                 'updateTextStyle': {
-                    'range': {
-                        'startIndex': url_start,
-                        'endIndex': url_end
-                    },
+                    'range': {'startIndex': url_start, 'endIndex': url_end},
                     'textStyle': {
                         'link': {'url': url},
-                        'foregroundColor': {
-                            'color': {
-                                'rgbColor': {
-                                    'blue': 1.0,
-                                    'green': 0.0,
-                                    'red': 0.0
-                                }
-                            }
-                        },
+                        'foregroundColor': {'color': {'rgbColor': {'blue': 1.0}}},
                         'underline': True
                     },
                     'fields': 'link,foregroundColor,underline'
                 }
             })
-            
             index += len(full_text)
-        
-        # Add title and disclaimer block at the top
+
+        # --- Main Content --- #
         add_paragraph("Parent Report", "HEADING_1")
         add_paragraph("")
         add_paragraph("We are parents helping parents have productive conversations with their pediatricians.")
@@ -567,287 +295,128 @@ class GoogleDocsService:
         add_paragraph("What this is—and isn't: This report shares information and resources to discuss with your healthcare provider. It is not medical advice, a diagnosis, or a treatment plan.")
         add_paragraph("")
         add_paragraph("What to know: Your kiddo is unique. What helps one child may not fit another, but we aim to find information from families with kids similar to yours. You'll see ideas from reputable clinical sources and from families who've been there. Use these insights to prepare for conversations with your child's clinician.")
-        add_paragraph("")
-        
-        # Demographic Information Section
+
+        # --- Your Information --- #
         add_paragraph("Your Information", "HEADING_2", page_break_before=True)
-        
-        # Parent/contact info from sheet
-        date_submitted = patient_info.get('date_submitted')
-        if date_submitted:
-            add_paragraph(f"Date Submitted: {date_submitted}")
-        
-        parent_name = patient_info.get('parent_name')
-        if parent_name:
-            add_paragraph(f"Parent Name: {parent_name}")
-        
-        email = patient_info.get('email')
-        if email:
-            add_paragraph(f"Email: {email}")
-        
-        zipcode = patient_info.get('zipcode')
-        if zipcode:
-            add_paragraph(f"Zipcode: {zipcode}")
+        if patient_info.get('date_submitted'): add_paragraph(f"Date Submitted: {patient_info['date_submitted']}")
+        if patient_info.get('parent_name'): add_paragraph(f"Parent Name: {patient_info['parent_name']}")
+        if patient_info.get('email'): add_paragraph(f"Email: {patient_info['email']}")
+        if patient_info.get('zipcode'): add_paragraph(f"Zipcode: {patient_info['zipcode']}")
         add_paragraph("")
-        
-        # Use correct field names from PatientParse model
-        age = patient_info.get('patient_age') or patient_info.get('age', 'N/A')
-        sex = patient_info.get('patient_sex') or patient_info.get('gender', 'N/A')
-        diagnosis = patient_info.get('diagnosis_status', 'N/A')
-        
-        add_paragraph(f"Child's Age: {age}")
-        add_paragraph(f"Sex: {sex}")
-        add_paragraph(f"Diagnosis Status: {diagnosis}")
-        
-        # Top Family Priorities
-        top_priorities = patient_info.get('top_family_priorities')
-        if top_priorities and isinstance(top_priorities, list) and len(top_priorities) > 0:
+        add_paragraph(f"Child's Age: {patient_info.get('patient_age', 'N/A')}")
+        add_paragraph(f"Sex: {patient_info.get('patient_sex', 'N/A')}")
+        add_paragraph(f"Diagnosis Status: {patient_info.get('diagnosis_status', 'N/A')}")
+        top_priorities = patient_info.get('top_family_priorities', [])
+        if top_priorities:
             add_paragraph("")
             add_paragraph("Top Family Priorities:")
-            for priority in top_priorities:
-                add_paragraph(f"• {priority}")
-        
-        # Hypotheses Section
+            for p in top_priorities: add_paragraph(f"• {p}")
+
+        # --- Top 3 Potential Root Causes --- #
         add_paragraph("Top 3 Potential Root Causes", "HEADING_2", page_break_before=True)
         hypotheses_list = hypotheses.get('hypotheses', [])
         if hypotheses_list:
             for i, hyp in enumerate(hypotheses_list[:3], 1):
-                title = hyp.get('name') or hyp.get('hypothesis') or 'Unknown'
-                add_paragraph(f"{i}. {title}", "HEADING_3")
-                rationale = hyp.get('rationale') or hyp.get('supporting_evidence') or 'N/A'
-                add_paragraph(f"Why this might fit (evidence): {rationale}")
-                tp = hyp.get('talking_points', []) or []
-                if tp:
+                add_paragraph(f"{i}. {hyp.get('name', 'Unknown')}", "HEADING_3")
+                add_paragraph(f"Why this might fit (evidence): {hyp.get('rationale', 'N/A')}")
+                if hyp.get('talking_points'):
                     add_paragraph("Talking points for your pediatrician", "HEADING_4")
-                    for b in tp:
-                        add_paragraph(f"• {b}")
-                tests = hyp.get('recommended_tests', []) or []
-                if tests:
+                    for tp in hyp['talking_points']: add_paragraph(f"• {tp}")
+                if hyp.get('recommended_tests'):
                     add_paragraph("Recommended tests to discuss or consider", "HEADING_4")
-                    for t in tests:
-                        line = f"• {t.get('name','Test')}"
+                    for t in hyp['recommended_tests']:
+                        line = f"• {t.get('name', 'Test')}"
                         if t.get('category'): line += f" — {t['category']}"
                         if t.get('order_type') == 'self_purchase': line += " (at-home or self-purchase)"
-                        elif t.get('order_type') == 'either': line += " (order via clinician or self-purchase)"
-                        if t.get('notes'): line += f" — {t['notes']}"
                         add_paragraph(line)
-                        if t.get('purchase_url'):
-                            add_link("Link", t['purchase_url'])
+                        if t.get('purchase_url'): add_link("Link", t['purchase_url'])
                 add_paragraph("")
         else:
-            add_paragraph("No root causes available")
-            add_paragraph("")
-        
-        # Next steps and uncertainties
-        uncertainties = hypotheses.get('uncertainties', [])
-        if uncertainties:
-            add_paragraph("Uncertainties", "HEADING_3")
-            for i, uncertainty in enumerate(uncertainties, 1):
-                add_paragraph(f"{i}. {uncertainty}")
-            add_paragraph("")
-        
-        next_steps = hypotheses.get('next_steps', [])
-        if next_steps:
-            add_paragraph("Recommended Next Steps", "HEADING_3")
-            for i, step in enumerate(next_steps, 1):
-                add_paragraph(f"{i}. {step}")
-            add_paragraph("")
-        
-        # Actionable Steps Section
+            add_paragraph("No root causes available.")
+
+        # --- What Others Have Tried (Actionable Steps) --- #
         add_paragraph("What Others Have Tried", "HEADING_2", page_break_before=True)
         add_paragraph("Based on the patterns identified above, here are approaches other families with similar situations have explored. This information is for discussion with your pediatrician—not medical advice. Always consult your care team before making changes.")
         add_paragraph("")
-        
-        # Implementation guidance
-        impl_guidance = actionable_steps.get('implementation_guidance')
-        if impl_guidance:
-            add_paragraph("Getting Started", "HEADING_3")
-            add_paragraph(impl_guidance)
-            add_paragraph("")
-        
-        # Recommended approaches - create a separate table for each intervention
+
+        # --- Intervention Tables --- #
         approaches = actionable_steps.get('recommended_approaches', [])
         if approaches:
-            add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
-            add_paragraph("")
-            
-            # Store table data for phase 2 population
-            table_data = {
-                'approaches': approaches,
-                'tables': []  # Will store start indices
-            }
-            
-            # Create a small table for each intervention
+            field_labels = ["Why This May Help", "What Others Did", "What Families Tracked", "Decision Points", "Considerations", "Notes"]
             for i, intervention in enumerate(approaches, 1):
-                # Add intervention name as heading
-                name = intervention.get('intervention_name', 'Unknown')
-                add_paragraph(f"{i}. {name}", "HEADING_4")
+                add_paragraph(f"{i}. {intervention.get('intervention_name', 'Unknown')}", "HEADING_4")
+                table_start_index = index
+                requests.append({'insertTable': {'rows': 6, 'columns': 2, 'location': {'index': table_start_index}}})
+
+                # Prepare content
+                contents = [
+                    intervention.get('why_this_may_help', 'N/A'),
+                    '\n'.join(f"• {item}" for item in intervention.get('what_others_have_done', [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in intervention.get('what_families_tracked', [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in intervention.get('common_decision_points', [])) or 'N/A',
+                    '\n'.join(f"• {item}" for item in intervention.get('considerations', [])) or 'N/A',
+                    "Review with your healthcare provider"
+                ]
+
+                # Populate cells
+                for row in range(6):
+                    # Left cell (label)
+                    label_cell_index = table_start_index + 4 + (row * 4)
+                    requests.append({'insertText': {'location': {'index': label_cell_index}, 'text': field_labels[row]}})
+                    requests.append({'updateTextStyle': {'range': {'startIndex': label_cell_index, 'endIndex': label_cell_index + len(field_labels[row])}, 'textStyle': {'bold': True}, 'fields': 'bold'}})
+
+                    # Right cell (content)
+                    content_cell_index = table_start_index + 6 + (row * 4)
+                    requests.append({'insertText': {'location': {'index': content_cell_index}, 'text': contents[row]}})
                 
-                # Record this table's start index
-                table_start = index
-                table_data['tables'].append(table_start)
-                
-                # Create a 6-row, 2-column table (Field | Value)
-                requests.append({
-                    'insertTable': {
-                        'rows': 6,  # 6 fields
-                        'columns': 2,  # Label | Content
-                        'location': {'index': table_start}
-                    }
-                })
-                
-                # Update index to after this table (6 rows * 2 cols * 2) + 1
-                # A 6x2 table takes (6 * 2 * 2) + 1 = 25 characters
-                table_size = (6 * 2 * 2) + 1
-                index += table_size
-                
-                # Add empty paragraph after table to exit table context
-                add_paragraph("")
-            
-            # Mark that we need to add remaining content after table population
-            # Don't add any more content in this phase to avoid index issues
-            table_data['has_remaining_content'] = True
-            table_data['general_notes'] = actionable_steps.get('general_notes', [])
-            table_data['resources'] = resources
-            table_data['patient_info'] = patient_info
-            
-            # Return early - we'll add the rest after tables are populated
-            return requests, table_data
-        
-        # If no tables, continue with remaining content normally
-        # General notes
+                # Manually advance index past the table. This is an approximation.
+                # A table with R rows and C columns takes up (R*C*2) + 1 characters.
+                # Our 6x2 table is (6*2*2)+1 = 25 characters.
+                index += 25
+                add_paragraph("") # Space after table
+
+        # --- General Notes --- #
         general_notes = actionable_steps.get('general_notes', [])
         if general_notes:
             add_paragraph("Important Reminders", "HEADING_3")
-            for note in general_notes:
-                add_paragraph(f"• {note}")
+            for note in general_notes: add_paragraph(f"• {note}")
             add_paragraph("")
-        
-        # Resources Section
+
+        # --- Local Resources --- #
         add_paragraph("Local Resources", "HEADING_2", page_break_before=True)
-        
-        # Check if resources generation was skipped
         if resources.get('status') == 'skipped':
             add_paragraph(f"Resource lookup skipped: {resources.get('reason', 'No reason provided')}")
         elif resources.get('status') == 'error':
             add_paragraph(f"Error generating resources: {resources.get('message', 'Unknown error')}")
         else:
             summary_report = resources.get('summary_report', {})
-            
             if summary_report:
-                # Patient location
                 location = summary_report.get('patient_location', {})
                 if location:
                     add_paragraph(f"Location: {location.get('city', 'N/A')}, {location.get('state', 'N/A')} {location.get('zip_code', 'N/A')}")
                     add_paragraph(f"Search Radius: {summary_report.get('search_radius_miles', 'N/A')} miles")
                     add_paragraph("")
                 
-                # State Early Intervention Program
                 ei_program = summary_report.get('state_early_intervention_program', {})
                 if ei_program:
                     add_paragraph("State Early Intervention Program", "HEADING_4")
-                    website = ei_program.get('website')
-                    if website:
-                        add_link("Website", website)
-                    if ei_program.get('contact_phone'):
-                        add_paragraph(f"Phone: {ei_program.get('contact_phone')}")
-                    if ei_program.get('contact_email'):
-                        add_paragraph(f"Email: {ei_program.get('contact_email')}")
+                    if ei_program.get('website'): add_link("Website", ei_program['website'])
+                    if ei_program.get('contact_phone'): add_paragraph(f"Phone: {ei_program['contact_phone']}")
                     add_paragraph("")
-                
-                # Pediatricians
+
                 peds = summary_report.get('pediatricians', [])
                 if peds:
                     add_paragraph("Pediatricians / Developmental Pediatrics", "HEADING_4")
                     for i, provider in enumerate(peds, 1):
-                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
-                        rating = provider.get('rating')
-                        reviews = provider.get('review_count')
-                        if rating is not None:
-                            txt = f"Rating: {rating:.1f}/5.0"
-                            if reviews: txt += f" ({reviews} reviews)"
-                            add_paragraph(txt)
-                        if provider.get('distance_miles') is not None:
-                            add_paragraph(f"Distance: {provider['distance_miles']:.1f} miles")
-                        add_paragraph(f"Address: {provider.get('address','N/A')}")
-                        if provider.get('phone'):
-                            add_paragraph(f"Phone: {provider['phone']}")
-                        if provider.get('website'):
-                            add_link("Website", provider['website'])
-                        if provider.get('specialties'):
-                            add_paragraph("Specialties: " + ', '.join(provider['specialties']))
-                        add_paragraph("")
-                
-                # Behavioral Providers
-                behavioral_providers = summary_report.get('behavioral_providers', [])
-                if behavioral_providers:
-                    add_paragraph("Behavioral Providers", "HEADING_4")
-                    for i, provider in enumerate(behavioral_providers, 1):
-                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
-                        rating = provider.get('rating')
-                        review_count = provider.get('review_count')
-                        if rating is not None:
-                            rating_text = f"Rating: {rating:.1f}/5.0"
-                            if review_count:
-                                rating_text += f" ({review_count} reviews)"
-                            add_paragraph(rating_text)
-                        distance = provider.get('distance_miles')
-                        if distance is not None:
-                            add_paragraph(f"Distance: {distance:.1f} miles")
+                        add_paragraph(f"{i}. {provider.get('name', 'Unknown')}", "HEADING_5")
+                        if provider.get('rating') is not None: add_paragraph(f"Rating: {provider['rating']:.1f}/5.0 ({provider.get('review_count', 0)} reviews)")
+                        if provider.get('distance_miles') is not None: add_paragraph(f"Distance: {provider['distance_miles']:.1f} miles")
                         add_paragraph(f"Address: {provider.get('address', 'N/A')}")
-                        if provider.get('phone'):
-                            add_paragraph(f"Phone: {provider.get('phone')}")
-                        website = provider.get('website')
-                        if website:
-                            add_link("Website", website)
-                        if provider.get('specialties'):
-                            specialties = ', '.join(provider.get('specialties', []))
-                            add_paragraph(f"Specialties: {specialties}")
+                        if provider.get('phone'): add_paragraph(f"Phone: {provider['phone']}")
+                        if provider.get('website'): add_link("Website", provider['website'])
                         add_paragraph("")
-                
-                # Speech Providers
-                speech_providers = summary_report.get('speech_providers', [])
-                if speech_providers:
-                    add_paragraph("Speech Providers", "HEADING_4")
-                    for i, provider in enumerate(speech_providers, 1):
-                        add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
-                        rating = provider.get('rating')
-                        review_count = provider.get('review_count')
-                        if rating is not None:
-                            rating_text = f"Rating: {rating:.1f}/5.0"
-                            if review_count:
-                                rating_text += f" ({review_count} reviews)"
-                            add_paragraph(rating_text)
-                        distance = provider.get('distance_miles')
-                        if distance is not None:
-                            add_paragraph(f"Distance: {distance:.1f} miles")
-                        add_paragraph(f"Address: {provider.get('address', 'N/A')}")
-                        if provider.get('phone'):
-                            add_paragraph(f"Phone: {provider.get('phone')}")
-                        website = provider.get('website')
-                        if website:
-                            add_link("Website", website)
-                        if provider.get('specialties'):
-                            specialties = ', '.join(provider.get('specialties', []))
-                            add_paragraph(f"Specialties: {specialties}")
-                        add_paragraph("")
-                
-                # Diagnostic evaluation link
-                diag_status = (patient_info.get('diagnosis_status') or "").strip().lower()
-                if diag_status in ("", "undiagnosed", "unknown", "none"):
-                    add_paragraph("Where to Obtain a Diagnostic Evaluation", "HEADING_3")
-                    add_paragraph("If you do not yet have an evaluation, here is a place to get started:")
-                    add_link("ADG Cares", "https://www.adgcares.com/")
-                    add_paragraph("")
-                
-                # Additional Notes
-                notes = summary_report.get('additional_notes', [])
-                if notes:
-                    add_paragraph("Additional Notes", "HEADING_4")
-                    for note in notes:
-                        add_paragraph(f"• {note}")
-                    add_paragraph("")
             else:
-                add_paragraph("No resources available for this location")
-        
-        return requests, table_data
+                add_paragraph("No resources available for this location.")
+
+        return requests
+
