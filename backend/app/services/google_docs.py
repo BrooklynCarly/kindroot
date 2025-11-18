@@ -211,6 +211,14 @@ class GoogleDocsService:
             if table_locations:
                 # Get the latest state of the document to find table cell indices
                 doc_content = self.docs_service.documents().get(documentId=doc_id, fields='body').execute()
+                
+                # --- TEMPORARY DIAGNOSTIC LOGGING ---
+                import json
+                print("--- DOCUMENT BODY STRUCTURE ---")
+                print(json.dumps(doc_content, indent=2))
+                print("-----------------------------")
+                # --- END DIAGNOSTIC LOGGING ---
+                
                 populate_requests = self._build_table_population_requests(table_locations, doc_content)
                 if populate_requests:
                     self.docs_service.documents().batchUpdate(
