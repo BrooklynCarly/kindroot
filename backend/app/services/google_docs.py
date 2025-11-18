@@ -654,7 +654,6 @@ class GoogleDocsService:
                 for col_idx in range(num_cols):
                     requests.append({
                         'updateTableCellStyle': {
-                            'tableStartLocation': {'index': table_start_index},
                             'tableRange': {
                                 'tableCellLocation': {
                                     'tableStartLocation': {'index': table_start_index},
