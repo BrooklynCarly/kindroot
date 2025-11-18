@@ -522,9 +522,8 @@ class GoogleDocsService:
                 }
             })
             
-            # Calculate new index after table insertion
-            # Each cell takes 2 characters (content + end-of-cell), plus 1 for table end
-            index = table_start_index + (num_rows * num_cols * 2) + 1
+            # Track total text length inserted into table cells
+            total_text_length = 0
             
             # Now populate the table cells using separate requests
             # Header row (row 0)
@@ -546,6 +545,7 @@ class GoogleDocsService:
                         'text': header_text
                     }
                 })
+                total_text_length += len(header_text)
                 # Make header bold
                 requests.append({
                     'updateTextStyle': {
@@ -571,6 +571,7 @@ class GoogleDocsService:
                         'text': name
                     }
                 })
+                total_text_length += len(name)
                 
                 # Column 1: Why this may help
                 why_help = intervention.get('why_this_may_help', 'N/A')
@@ -581,6 +582,7 @@ class GoogleDocsService:
                         'text': why_help
                     }
                 })
+                total_text_length += len(why_help)
                 
                 # Column 2: What others did
                 what_done = intervention.get('what_others_have_done', [])
@@ -592,6 +594,7 @@ class GoogleDocsService:
                         'text': what_done_text
                     }
                 })
+                total_text_length += len(what_done_text)
                 
                 # Column 3: What families tracked
                 tracked = intervention.get('what_families_tracked', [])
@@ -603,6 +606,7 @@ class GoogleDocsService:
                         'text': tracked_text
                     }
                 })
+                total_text_length += len(tracked_text)
                 
                 # Column 4: Decision points
                 decision_points = intervention.get('common_decision_points', [])
@@ -614,6 +618,7 @@ class GoogleDocsService:
                         'text': decision_text
                     }
                 })
+                total_text_length += len(decision_text)
                 
                 # Column 5: Considerations
                 considerations = intervention.get('considerations', [])
@@ -625,6 +630,11 @@ class GoogleDocsService:
                         'text': considerations_text
                     }
                 })
+                total_text_length += len(considerations_text)
+            
+            # Calculate final index after table with all text inserted
+            # Each cell takes 2 chars (content + end-of-cell), plus 1 for table end
+            index = table_start_index + (num_rows * num_cols * 2) + 1 + total_text_length
             
             # Style the table to fit page width
             # Set table width to match page margins (8.5" page with 1" margins = 6.5" content width)
