@@ -233,51 +233,50 @@ class GoogleDocsService:
             )
 
     def _build_report_content(
-        self,
-        patient_info: Dict[str, Any],
-        triage_result: Dict[str, Any],
-        hypotheses: Dict[str, Any],
-        actionable_steps: Dict[str, Any],
-        resources: Dict[str, Any]
-    ) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+            self,
+            patient_info: Dict[str, Any],
+            hypotheses: Dict[str, Any],
+            actionable_steps: Dict[str, Any],
+            resources: Dict[str, Any]
+        ) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """
-        Build the batch update requests for document content.
-        
+         Build the batch update requests for document content.
+    
         Returns:
             Tuple of (main_requests, toc_requests) - TOC requests must be applied after main content
         """
         requests = []
         index = 1  # Start after the title
-        heading2_sections = []  # Track HEADING_2 sections for TOC
-        
+    
         # Helper to add text with optional styling
-        def add_paragraph(text: str, style: str = "NORMAL_TEXT", index_offset: int = 0, page_break_before: bool = False):
+        def add_paragraph(text: str, style: str = "NORMAL_TEXT", page_break_before: bool = False):
             nonlocal index
-            insert_index = index + index_offset
             
             # Add page break before if requested
             if page_break_before:
                 requests.append({
                     'insertPageBreak': {
-                        'location': {'index': insert_index}
+                        'location': {'index': index}
                     }
                 })
                 index += 1
-                insert_index = index + index_offset
             
+            # Insert text
             requests.append({
                 'insertText': {
-                    'location': {'index': insert_index},
+                    'location': {'index': index},
                     'text': text + '\n'
                 }
             })
+            
+            # Apply styling if not normal text
             if style != "NORMAL_TEXT":
                 text_length = len(text)
                 requests.append({
                     'updateParagraphStyle': {
                         'range': {
-                            'startIndex': insert_index,
-                            'endIndex': insert_index + text_length
+                            'startIndex': index,
+                            'endIndex': index + text_length + 1  # Include the newline
                         },
                         'paragraphStyle': {
                             'namedStyleType': style
@@ -285,32 +284,25 @@ class GoogleDocsService:
                         'fields': 'namedStyleType'
                     }
                 })
-                
-                # Track HEADING_2 sections for TOC
-                if style == "HEADING_2":
-                    heading2_sections.append({
-                        'text': text,
-                        'index': insert_index
-                    })
             
+            # Update index
             index += len(text) + 1
         
         # Helper to add text with a clickable hyperlink
         def add_link(label: str, url: str):
             nonlocal index
-            insert_index = index
             full_text = f"{label}: {url}\n"
             
             # Insert the text
             requests.append({
                 'insertText': {
-                    'location': {'index': insert_index},
+                    'location': {'index': index},
                     'text': full_text
                 }
             })
             
             # Make the URL portion clickable
-            url_start = insert_index + len(label) + 2  # After "label: "
+            url_start = index + len(label) + 2  # After "label: "
             url_end = url_start + len(url)
             
             requests.append({
@@ -337,32 +329,6 @@ class GoogleDocsService:
             })
             
             index += len(full_text)
-        
-        # Helper to create a table
-        def add_table(rows: int, cols: int) -> int:
-            """Insert a table and return the starting index of the table."""
-            nonlocal index
-            table_start = index
-            requests.append({
-                'insertTable': {
-                    'rows': rows,
-                    'columns': cols,
-                    'location': {'index': table_start}
-                }
-            })
-            # After inserting a table with r rows and c cols, the index advances by:
-            # r * c * 2 + 1 (each cell has 2 chars: content + end-of-cell marker, plus 1 for table end)
-            index += rows * cols * 2 + 1
-            return table_start
-        
-        # Helper to insert text into a table cell
-        def insert_table_cell_text(row: int, col: int, text: str, table_start: int):
-            """Insert text into a specific table cell."""
-            # Calculate cell position: table_start + 1 + (row * num_cols + col) * 2
-            # We'll need to track the number of columns
-            nonlocal index
-            # For now, we'll add this to a separate list and apply after table creation
-            pass
         
         # Add title and disclaimer block at the top
         add_paragraph("Parent Report", "HEADING_1")
@@ -394,6 +360,7 @@ class GoogleDocsService:
         if zipcode:
             add_paragraph(f"Zipcode: {zipcode}")
         add_paragraph("")
+        
         # Use correct field names from PatientParse model
         age = patient_info.get('patient_age') or patient_info.get('age', 'N/A')
         sex = patient_info.get('patient_sex') or patient_info.get('gender', 'N/A')
@@ -411,44 +378,11 @@ class GoogleDocsService:
             for priority in top_priorities:
                 add_paragraph(f"• {priority}")
         
-        # # Triage Results Section (supports both legacy and new schemas)
-        # triage_title = triage_result.get('summary_title') or "Safety & Triage Summary"
-        # add_paragraph(triage_title, "HEADING_1")
-        # triage_message = triage_result.get('message')
-        # if triage_message:
-        #     add_paragraph(triage_message)
-        #     add_paragraph("")
-        
-        # urgent_items = triage_result.get('urgent_items', []) or []
-        # if urgent_items:
-        #     add_paragraph("Urgent Items:", "HEADING_2")
-        #     for i, item in enumerate(urgent_items, 1):
-        #         add_paragraph(f"{i}. {item.get('category', item.get('title', 'Unknown Category'))}", "HEADING_3")
-        #         add_paragraph(f"Severity: {item.get('severity', item.get('level', 'N/A'))}")
-        #         add_paragraph(f"Evidence: {item.get('evidence', item.get('details', 'N/A'))}")
-        #         add_paragraph(f"Why It Matters: {item.get('why_it_matters', item.get('why', 'N/A'))}")
-        #         add_paragraph(f"Next Step: {item.get('next_step', item.get('action', 'N/A'))}")
-        #         add_paragraph("")
-        
-        # # Moderate items (new schema)
-        # moderate_items = triage_result.get('moderate_items', []) or []
-        # if moderate_items:
-        #     add_paragraph("Moderate Items:", "HEADING_2")
-        #     for i, item in enumerate(moderate_items, 1):
-        #         add_paragraph(f"{i}. {item.get('category', item.get('title', 'Unknown Category'))}", "HEADING_3")
-        #         add_paragraph(f"Severity: {item.get('severity', item.get('level', 'N/A'))}")
-        #         add_paragraph(f"Evidence: {item.get('evidence', item.get('details', 'N/A'))}")
-        #         add_paragraph(f"Why It Matters: {item.get('why_it_matters', item.get('why', 'N/A'))}")
-        #         add_paragraph(f"Next Step: {item.get('next_step', item.get('action', 'N/A'))}")
-        #         add_paragraph("")
-        
         # Hypotheses Section
-        # Top 3 Potential Root Causes (parent-friendly)
         add_paragraph("Top 3 Potential Root Causes", "HEADING_2", page_break_before=True)
         hypotheses_list = hypotheses.get('hypotheses', [])
         if hypotheses_list:
             for i, hyp in enumerate(hypotheses_list[:3], 1):
-                # Support both schemas: name/rationale and hypothesis/supporting_evidence
                 title = hyp.get('name') or hyp.get('hypothesis') or 'Unknown'
                 add_paragraph(f"{i}. {title}", "HEADING_3")
                 rationale = hyp.get('rationale') or hyp.get('supporting_evidence') or 'N/A'
@@ -475,7 +409,7 @@ class GoogleDocsService:
             add_paragraph("No root causes available")
             add_paragraph("")
         
-        # Next steps and uncertainties are at the top level, not per hypothesis
+        # Next steps and uncertainties
         uncertainties = hypotheses.get('uncertainties', [])
         if uncertainties:
             add_paragraph("Uncertainties", "HEADING_3")
@@ -508,7 +442,7 @@ class GoogleDocsService:
             add_paragraph("Important: Discuss any new changes with your pediatrician", "NORMAL_TEXT")
             add_paragraph("")
             
-            # Create table: 1 header row + N data rows, 7 columns
+            # Create table: 1 header row + N data rows, 6 columns
             num_rows = len(approaches) + 1
             num_cols = 6
             table_start_index = index
@@ -632,15 +566,15 @@ class GoogleDocsService:
                 })
                 total_text_length += len(considerations_text)
             
-            # Calculate final index after table with all text inserted
-            # Each cell takes 2 chars (content + end-of-cell), plus 1 for table end
-            index = table_start_index + (num_rows * num_cols * 2) + 1 + total_text_length
+            # Calculate final index after table
+            # A table with r rows and c columns takes: (r * c * 2) + 1 characters
+            # Each cell is 2 chars (one for content start marker, one for cell end marker)
+            # Plus 1 for the table end marker
+            # The text inserted into cells is PART of those cell content positions
+            index = table_start_index + (num_rows * num_cols * 2) + 1
             
             # Style the table to fit page width
-            # Set table width to match page margins (8.5" page with 1" margins = 6.5" content width)
-            table_width_magnitude = 468  # 6.5 inches * 72 points per inch = 468 points
-            
-            # Set column widths to distribute evenly across page width
+            table_width_magnitude = 468  # 6.5 inches * 72 points per inch
             column_width = table_width_magnitude / num_cols
             
             for col_idx in range(num_cols):
@@ -681,9 +615,6 @@ class GoogleDocsService:
                             'fields': 'paddingTop,paddingBottom,paddingLeft,paddingRight,contentAlignment'
                         }
                     })
-            
-            # Don't add paragraph after table - let next section handle spacing
-            # This avoids complex index calculations after table population
         
         # General notes
         general_notes = actionable_steps.get('general_notes', [])
@@ -702,7 +633,6 @@ class GoogleDocsService:
         elif resources.get('status') == 'error':
             add_paragraph(f"Error generating resources: {resources.get('message', 'Unknown error')}")
         else:
-            # Resources come from ResourceFinderResult: resources['summary_report']
             summary_report = resources.get('summary_report', {})
             
             if summary_report:
@@ -710,7 +640,6 @@ class GoogleDocsService:
                 location = summary_report.get('patient_location', {})
                 if location:
                     add_paragraph(f"Location: {location.get('city', 'N/A')}, {location.get('state', 'N/A')} {location.get('zip_code', 'N/A')}")
-                    # add_paragraph(f"Metropolitan Area: {summary_report.get('metropolitan_status', 'N/A')}")
                     add_paragraph(f"Search Radius: {summary_report.get('search_radius_miles', 'N/A')} miles")
                     add_paragraph("")
                 
@@ -725,14 +654,16 @@ class GoogleDocsService:
                         add_paragraph(f"Phone: {ei_program.get('contact_phone')}")
                     if ei_program.get('contact_email'):
                         add_paragraph(f"Email: {ei_program.get('contact_email')}")
+                    add_paragraph("")
                 
-                # Pediatricians / Developmental Pediatrics
+                # Pediatricians
                 peds = summary_report.get('pediatricians', [])
                 if peds:
                     add_paragraph("Pediatricians / Developmental Pediatrics", "HEADING_4")
                     for i, provider in enumerate(peds, 1):
                         add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
-                        rating = provider.get('rating'); reviews = provider.get('review_count')
+                        rating = provider.get('rating')
+                        reviews = provider.get('review_count')
                         if rating is not None:
                             txt = f"Rating: {rating:.1f}/5.0"
                             if reviews: txt += f" ({reviews} reviews)"
@@ -740,20 +671,20 @@ class GoogleDocsService:
                         if provider.get('distance_miles') is not None:
                             add_paragraph(f"Distance: {provider['distance_miles']:.1f} miles")
                         add_paragraph(f"Address: {provider.get('address','N/A')}")
-                        if provider.get('phone'): add_paragraph(f"Phone: {provider['phone']}")
-                        if provider.get('website'): add_link("Website", provider['website'])
+                        if provider.get('phone'):
+                            add_paragraph(f"Phone: {provider['phone']}")
+                        if provider.get('website'):
+                            add_link("Website", provider['website'])
                         if provider.get('specialties'):
                             add_paragraph("Specialties: " + ', '.join(provider['specialties']))
                         add_paragraph("")
-
+                
                 # Behavioral Providers
                 behavioral_providers = summary_report.get('behavioral_providers', [])
                 if behavioral_providers:
                     add_paragraph("Behavioral Providers", "HEADING_4")
                     for i, provider in enumerate(behavioral_providers, 1):
                         add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
-                        
-                        # Rating and reviews
                         rating = provider.get('rating')
                         review_count = provider.get('review_count')
                         if rating is not None:
@@ -761,33 +692,26 @@ class GoogleDocsService:
                             if review_count:
                                 rating_text += f" ({review_count} reviews)"
                             add_paragraph(rating_text)
-                        
-                        # Distance
                         distance = provider.get('distance_miles')
                         if distance is not None:
                             add_paragraph(f"Distance: {distance:.1f} miles")
-                        
                         add_paragraph(f"Address: {provider.get('address', 'N/A')}")
-                        
                         if provider.get('phone'):
                             add_paragraph(f"Phone: {provider.get('phone')}")
-                        
                         website = provider.get('website')
                         if website:
                             add_link("Website", website)
-                        
                         if provider.get('specialties'):
                             specialties = ', '.join(provider.get('specialties', []))
                             add_paragraph(f"Specialties: {specialties}")
-
+                        add_paragraph("")
+                
                 # Speech Providers
                 speech_providers = summary_report.get('speech_providers', [])
                 if speech_providers:
                     add_paragraph("Speech Providers", "HEADING_4")
                     for i, provider in enumerate(speech_providers, 1):
                         add_paragraph(f"{i}. {provider.get('name', 'Unknown Provider')}", "HEADING_5")
-                        
-                        # Rating and reviews
                         rating = provider.get('rating')
                         review_count = provider.get('review_count')
                         if rating is not None:
@@ -795,32 +719,28 @@ class GoogleDocsService:
                             if review_count:
                                 rating_text += f" ({review_count} reviews)"
                             add_paragraph(rating_text)
-                        
-                        # Distance
                         distance = provider.get('distance_miles')
                         if distance is not None:
                             add_paragraph(f"Distance: {distance:.1f} miles")
-                        
                         add_paragraph(f"Address: {provider.get('address', 'N/A')}")
-                        
                         if provider.get('phone'):
                             add_paragraph(f"Phone: {provider.get('phone')}")
-                        
                         website = provider.get('website')
                         if website:
                             add_link("Website", website)
-                        
                         if provider.get('specialties'):
                             specialties = ', '.join(provider.get('specialties', []))
                             add_paragraph(f"Specialties: {specialties}")
+                        add_paragraph("")
                 
-                # If undiagnosed, add "Where to obtain an evaluation"
+                # Diagnostic evaluation link
                 diag_status = (patient_info.get('diagnosis_status') or "").strip().lower()
                 if diag_status in ("", "undiagnosed", "unknown", "none"):
                     add_paragraph("Where to Obtain a Diagnostic Evaluation", "HEADING_3")
                     add_paragraph("If you do not yet have an evaluation, here is a place to get started:")
                     add_link("ADG Cares", "https://www.adgcares.com/")
-
+                    add_paragraph("")
+                
                 # Additional Notes
                 notes = summary_report.get('additional_notes', [])
                 if notes:
@@ -831,5 +751,4 @@ class GoogleDocsService:
             else:
                 add_paragraph("No resources available for this location")
         
-        # Return main requests only (TOC disabled for now due to API limitations)
         return requests, []
