@@ -235,6 +235,7 @@ class GoogleDocsService:
     def _build_report_content(
             self,
             patient_info: Dict[str, Any],
+            triage_result: Dict[str, Any],
             hypotheses: Dict[str, Any],
             actionable_steps: Dict[str, Any],
             resources: Dict[str, Any]
