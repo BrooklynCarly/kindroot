@@ -531,7 +531,6 @@ class GoogleDocsService:
             headers = [
                 "Intervention",
                 "Why This May Help",
-                "May Help With",
                 "What Others Did",
                 "What Families Tracked",
                 "Decision Points",
@@ -583,21 +582,10 @@ class GoogleDocsService:
                     }
                 })
                 
-                # Column 2: Addresses concerns
-                concerns = intervention.get('addresses_multiple_concerns', [])
-                concerns_text = ', '.join(concerns) if concerns else 'N/A'
-                cell_index = table_start_index + 1 + (row_idx * num_cols + 2) * 2
-                requests.append({
-                    'insertText': {
-                        'location': {'index': cell_index},
-                        'text': concerns_text
-                    }
-                })
-                
-                # Column 3: What others did
+                # Column 2: What others did
                 what_done = intervention.get('what_others_have_done', [])
                 what_done_text = '\n'.join(f"• {item}" for item in what_done) if what_done else 'N/A'
-                cell_index = table_start_index + 1 + (row_idx * num_cols + 3) * 2
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 2) * 2
                 requests.append({
                     'insertText': {
                         'location': {'index': cell_index},
@@ -605,10 +593,10 @@ class GoogleDocsService:
                     }
                 })
                 
-                # Column 4: What families tracked
+                # Column 3: What families tracked
                 tracked = intervention.get('what_families_tracked', [])
                 tracked_text = '\n'.join(f"• {item}" for item in tracked) if tracked else 'N/A'
-                cell_index = table_start_index + 1 + (row_idx * num_cols + 4) * 2
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 3) * 2
                 requests.append({
                     'insertText': {
                         'location': {'index': cell_index},
@@ -616,10 +604,10 @@ class GoogleDocsService:
                     }
                 })
                 
-                # Column 5: Decision points
+                # Column 4: Decision points
                 decision_points = intervention.get('common_decision_points', [])
                 decision_text = '\n'.join(f"• {item}" for item in decision_points) if decision_points else 'N/A'
-                cell_index = table_start_index + 1 + (row_idx * num_cols + 5) * 2
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 4) * 2
                 requests.append({
                     'insertText': {
                         'location': {'index': cell_index},
@@ -627,19 +615,16 @@ class GoogleDocsService:
                     }
                 })
                 
-                # Column 6: Considerations
+                # Column 5: Considerations
                 considerations = intervention.get('considerations', [])
                 considerations_text = '\n'.join(f"• {item}" for item in considerations) if considerations else 'N/A'
-                cell_index = table_start_index + 1 + (row_idx * num_cols + 6) * 2
+                cell_index = table_start_index + 1 + (row_idx * num_cols + 5) * 2
                 requests.append({
                     'insertText': {
                         'location': {'index': cell_index},
                         'text': considerations_text
                     }
                 })
-            
-            # Add all cell updates in reverse order to prevent index shifting
-            requests.extend(reversed(cell_updates))
             
             # Style the table to fit page width
             # Set table width to match page margins (8.5" page with 1" margins = 6.5" content width)
@@ -663,6 +648,28 @@ class GoogleDocsService:
                         'fields': 'widthType,width'
                     }
                 })
+            
+            # Set padding and wrapping for all cells
+            for row_idx in range(num_rows):
+                for col_idx in range(num_cols):
+                    cell_location = {
+                        'tableStartLocation': {'index': table_start_index},
+                        'rowIndex': row_idx,
+                        'columnIndex': col_idx
+                    }
+                    requests.append({
+                        'updateTableCellStyle': {
+                            'tableCellStyle': {
+                                'paddingTop': {'magnitude': 5, 'unit': 'PT'},
+                                'paddingBottom': {'magnitude': 5, 'unit': 'PT'},
+                                'paddingLeft': {'magnitude': 5, 'unit': 'PT'},
+                                'paddingRight': {'magnitude': 5, 'unit': 'PT'},
+                                'contentAlignment': 'TOP'
+                            },
+                            'fields': 'paddingTop,paddingBottom,paddingLeft,paddingRight,contentAlignment',
+                            **cell_location
+                        }
+                    })
             
             # Add spacing after table
             add_paragraph("")
