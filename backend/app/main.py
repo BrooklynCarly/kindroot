@@ -133,6 +133,25 @@ async def root():
 async def health_check():
     return {"status": "healthy", "services": {"google_sheets": "connected"}}
 
+# Database initialization endpoint (temporary - remove after first use)
+@app.get("/init-db")
+async def init_database():
+    """
+    Initialize the resources database. 
+    This is a temporary endpoint for one-time setup.
+    Remove this endpoint after running it once in production.
+    """
+    try:
+        from app.init_db import init_db
+        init_db()
+        return {"status": "success", "message": "Database initialized with default categories"}
+    except Exception as e:
+        logger.error(f"Database initialization failed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database initialization failed: {str(e)}"
+        )
+
 # Google Sheets endpoints
 @app.get("/api/sheets/read")
 async def read_sheet(range: str):
