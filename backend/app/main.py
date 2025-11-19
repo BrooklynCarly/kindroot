@@ -64,6 +64,8 @@ CONSUMER_FRONTEND_URL = os.getenv("CONSUMER_FRONTEND_URL", "http://localhost:300
 allowed_origins = [
     "http://localhost:3000",  # Local admin frontend
     "http://localhost:3001",  # Local consumer frontend
+    "https://www.kindroot.io",  # Production consumer frontend
+    "https://kindroot.io",  # Production consumer frontend (without www)
 ]
 
 # Add production URLs if configured
