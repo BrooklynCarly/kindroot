@@ -1,10 +1,8 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const QUIZ_URL = 'https://form.typeform.com/to/sf98mAlp'
 
 export default function Header() {
-  const location = useLocation()
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-primary shadow-md">
       <div className="container-custom">
