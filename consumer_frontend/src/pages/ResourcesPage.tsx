@@ -105,7 +105,7 @@ export default function ResourcesPage() {
                 Resources for Parents
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-                Helpful resources, support groups, and information curated for families
+                Here are some resources that we have found very helpful. Discovered by us or recommended by other parents!
               </p>
               
               {/* Search Bar */}
