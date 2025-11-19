@@ -1,16 +1,17 @@
-import Header from './components/Header'
-import Hero from './components/Hero'
-import About from './components/About'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import ResourcesPage from './pages/ResourcesPage'
+import ResourceDetailPage from './pages/ResourceDetailPage'
 
 function App() {
   return (
-    <div className="min-h-screen bg-white">
-      <Header />
-      <div className="pt-14 sm:pt-16">
-        <Hero />
-        <About />
-      </div>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/resources/:id" element={<ResourceDetailPage />} />
+      </Routes>
+    </Router>
   )
 }
 

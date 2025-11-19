@@ -18,3 +18,6 @@ httpx>=0.28.1
 autogen-agentchat>=0.4.2
 openai>=1.0.0
 # google-generativeai>=0.8.0
+
+# SQLAlchemy for resources database
+sqlalchemy>=2.0.0

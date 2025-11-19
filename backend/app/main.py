@@ -81,7 +81,7 @@ app.add_middleware(
 )
 
 # Import and register routers
-from app.routers import patients, reports, auth
+from app.routers import patients, reports, auth, resources
 
 # Register auth router (no /api prefix as it's already in the router)
 app.include_router(auth.router)
@@ -89,6 +89,7 @@ app.include_router(auth.router)
 # Register other routers
 app.include_router(patients.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
+app.include_router(resources.router, prefix="/api")
 
 # Pydantic models for request/response validation
 class SheetRangeRequest(BaseModel):
