@@ -28,6 +28,9 @@ def init_db():
         {"name": "Medical Resources", "description": "Healthcare providers and medical information"},
         {"name": "Legal Resources", "description": "Legal rights and advocacy resources"},
         {"name": "Community Activities", "description": "Social activities and recreation programs"},
+        {"name": "Products", "description": "Helpful products and tools for families"},
+        {"name": "Tests", "description": "Diagnostic tests and assessment resources"},
+        {"name": "Apps", "description": "Mobile and web applications for families"},
     ]
     
     for cat_data in default_categories:
